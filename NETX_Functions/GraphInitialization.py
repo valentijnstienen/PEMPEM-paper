@@ -66,7 +66,7 @@ if CASE == 'WorldBank':
                 gdf.geometry = old_geom + segments_line
         else: gdf = gdf_old
         # Save new geodataframe (use pickle)
-        with open("../Results/_TEMP/GraphInitialization/gdf_new_"+case+".pickle", "wb") as file: pickle.dump(gdf, file)
+        with open("Results/_TEMP/GraphInitialization/gdf_new_"+case+".pickle", "wb") as file: pickle.dump(gdf, file)
     """ ----------------------------------------------------------------------------"""
 
     """ ----------------------------------------------------------------------------"""
@@ -86,7 +86,7 @@ if CASE == 'WorldBank':
         G : graph
         """
         # Load previously saved geodataframe
-        with open("../Results/_TEMP/GraphInitialization/gdf_new_"+case+".pickle", "rb") as input_file: gdf = pickle.load(input_file)
+        with open("Results/_TEMP/GraphInitialization/gdf_new_"+case+".pickle", "rb") as input_file: gdf = pickle.load(input_file)
     
         # Compute the start- and end-position based on linestring 
         gdf['Start_pos'] = gdf.geometry.apply(lambda x: x.coords[0])
@@ -135,7 +135,7 @@ if CASE == 'WorldBank':
             # Add the reverse edge to the graph
             if make_G_bidi: G.add_edge(u_for_edge = v, v_for_edge = u, **dict_row)
     
-        with open("../Results/_TEMP/GraphInitialization/graph_"+case+".pickle", "wb") as file: pickle.dump(G, file)
+        with open("Results/_TEMP/GraphInitialization/graph_"+case+".pickle", "wb") as file: pickle.dump(G, file)
     """ ----------------------------------------------------------------------------"""
 
     """ ----------------------------------------------------------------------------"""
@@ -143,7 +143,7 @@ if CASE == 'WorldBank':
     """ ----------------------------------------------------------------------------"""
     def create_final_initial_graph(case):
         # Load previously saved graph
-        with open("../Results/_TEMP/GraphInitialization/graph_"+case+".pickle", "rb") as input_file: G = pickle.load(input_file)
+        with open("Results/_TEMP/GraphInitialization/graph_"+case+".pickle", "rb") as input_file: G = pickle.load(input_file)
     
         # Simplify graph
         G = ox.simplification.simplify_graph(G, strict=True, remove_rings=False)
@@ -153,6 +153,7 @@ if CASE == 'WorldBank':
         nx.set_edge_attributes(G, "-", name = 'close_to_point_end')
         nx.set_edge_attributes(G, False, name = 'oneway')
         nx.set_edge_attributes(G, False, name = 'new')
+        nx.set_edge_attributes(G, None, name = 'highway')
     
         # Fix geometry issues for the new graph
         edges = ox.graph_to_gdfs(G, nodes = False)
@@ -165,7 +166,7 @@ if CASE == 'WorldBank':
     
         # Save the final initial graph
         if not os.path.exists("../Results/"+CASE+"/"+CASENAME): os.makedirs("../Results/"+CASE+"/"+CASENAME)
-        with open("../Results/"+CASE+"/"+CASENAME+"/graph_0-0_"+case+"_1309.pickle", "wb") as file: pickle.dump(G, file)
+        with open("Results/"+CASE+"/"+CASENAME+"/graph_0-0_"+case+"_1309.pickle", "wb") as file: pickle.dump(G, file)
     """ ----------------------------------------------------------------------------"""
     # Find the Graph object (NetworkX)
     if network_to_be_graphed == 'ESTRADA': shape2gdf_full('Data/'+CASE+'/_Shapefiles/roads.shp', case = 'ESTRADA', make_full = True)

@@ -568,9 +568,7 @@ def ExtendGraph_trajectory(G_proj, tripdf, step, settings, do_print = False):
                         # Note that the newNode is added explicitly, so not merged with an existing node. This means that the end of edge[1] has to be the end of the edge_to_be adjusted. In case we added the node(s) two ways, this might be the opposite edge. 
                         elif (len(re) > 1) & (edge_to_be_adjusted[1] != edge[1]): 
                             edge_to_be_adjusted = re[1]
-                            if edge_to_be_adjusted[1] != edge[1]: 
-                                print("HUILEN")
-                                stop
+
                     # 2) If the temp_last_point has been added explicitly and the new node is merged with this temp_last_point
                     elif temp_new & (temp_last_point == newNode): # One node added to the network, self edge shapes the geometry
                         re = remove_point(G_proj, newNode, do_print = do_print)
@@ -962,7 +960,7 @@ def ExtendGraph_trajectory(G_proj, tripdf, step, settings, do_print = False):
 
 
   
-def ExtendGraphWithOSM_NEW(used_crs, ex_poly, points, buf = 500):
+def ExtendGraphWithOSM_NEW(used_crs, ex_poly, points, buf = 500, merging = False):
     """
     Create a polygon that covers all points in the [points] dataset. Use a 
     default buffer of 500 meters here. Project using the same CRS [used_crs] 
@@ -994,6 +992,6 @@ def ExtendGraphWithOSM_NEW(used_crs, ex_poly, points, buf = 500):
     ch_polygon = MultiPoint(list(map(lambda x, y:(x,y), test_temp.geometry.x, test_temp.geometry.y))).convex_hull.buffer(buf)
     ch_polygon_proj = ox.projection.project_geometry(ch_polygon, crs = test_temp.crs, to_latlong = True)[0]
     # If the existing polygon contains the new polygon, just return the existing polygon
-    if ex_poly.contains(ch_polygon_proj): return ex_poly, None, ch_polygon
+    if (ex_poly.contains(ch_polygon_proj) | merging): return ex_poly, None, ch_polygon
     else: return (ex_poly, None, None)  
 
