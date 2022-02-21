@@ -25,7 +25,7 @@ else:
     MIN_TIME_BETWEEN_POINTS = 5 # seconds 
     MIN_SUBTRIP_LENGTH = 5
     ALWAYS_COURSE = False # True if we want to adjust the course always (not only when we are not sure)
-    FNAME = 'PEMPEM2/PEMPEM_subtrips_'+str(MAX_DOWN_TIME)+'_'+str(DOWN_SPEED)+'_'+str(MAX_SPEED)+'_'+str(MIN_ACF_DISTANCE_COVERED)+'_'+str(MIN_TIME_BETWEEN_POINTS)+'_'+str(MIN_SUBTRIP_LENGTH)+'_ARTCOURSE_DIRECTION_'+str(ALWAYS_COURSE)+'_1311.csv'
+    FNAME = 'PEMPEM/PEMPEM_subtrips_'+str(MAX_DOWN_TIME)+'_'+str(DOWN_SPEED)+'_'+str(MAX_SPEED)+'_'+str(MIN_ACF_DISTANCE_COVERED)+'_'+str(MIN_TIME_BETWEEN_POINTS)+'_'+str(MIN_SUBTRIP_LENGTH)+'_ARTCOURSE_DIRECTION_'+str(ALWAYS_COURSE)+'_1311.csv'
     # ------------------------------------#
     SAVE_STOPS = False
     FNAME_STOPS = 'PEMPEM/PEMPEM_stops_'+str(MAX_DOWN_TIME)+'_'+str(DOWN_SPEED)+'_'+str(MAX_SPEED)+'_'+str(MIN_ACF_DISTANCE_COVERED)+'_'+str(MIN_TIME_BETWEEN_POINTS)+'_'+str(MIN_SUBTRIP_LENGTH)+'_ARTCOURSE_DIRECTION_'+str(ALWAYS_COURSE)+'_1311.csv'
