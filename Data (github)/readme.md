@@ -1,11 +1,11 @@
 # Data pre-processing
 Here, we pre-process (if needed) any raw output from GPS trajectories to the desired format used in the algorithm (see Section 3 in the paper). Any raw data used looks as follows:
 
-| Date                |Latitude|Longitude|Course |
-| :------------------ |-------:|--------:|------:|
-| 2020-04-11 11:46:44 |-0.74603|100.53225 | 132   | 
-| 2020-04-11 11:46:51 |-0.75559|100.54749 | 133   |
-| 2020-04-11 11:47:51 |-0.75339|100.55469 | 126   |
+| Date                |Latitude|Longitude|Course|
+| :------------------ |-------:|--------:|-----:|
+| 2020-04-11 11:46:44 |-0.74603|100.53225| 132  | 
+| 2020-04-11 11:46:51 |-0.75559|100.54749| 133  |
+| 2020-04-11 11:47:51 |-0.75339|100.55469| 126  |
 | ... | ... | ... | ... |
 
 For the desired format, we want to extract subtrips from this initial raw data; trips for which we assume that they consist of GPS points that were received "in one go", without any outlying points. Moreover, we want to obtain information about the Most Likely Distance Covered (MLDC), and the Maximum Distance Covered (MDC). For more details, we refer to the paper. These numbers will be based on:
@@ -14,7 +14,7 @@ For the desired format, we want to extract subtrips from this initial raw data; 
 * MLDC: the maximal distance that can be covered using the velocity and time staps. 
 * MDC: the maximal distance that can be covered using the change in time stamps.
 
-This pre-processing algorithm subdivides the raw data into subtrips (with different IDs) and <br />computes, among other things that might be interested, the quantities described above. The<br /> end result will contain at least this information and will look as follows:
+This pre-processing algorithm subdivides the raw data into subtrips (with different IDs) and computes, among other things that might be interested, the quantities described above. The end result will contain at least this information and will look as follows:
 
 | Date                |Latitude|Longitude|Course |MinDistance_LOC | MaxDistance_VELTIME | MaxDistance_TIME | ID |
 | :------------------ |-------:|--------:|------:|----:|----:|----:|----:|
