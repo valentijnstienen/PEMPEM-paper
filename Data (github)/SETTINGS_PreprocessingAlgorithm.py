@@ -3,9 +3,10 @@
 """-----------------------------------------"""
 
 # PATH to the csv file with the (raw) GPS trajectories
-PATH_TO_RAW_GPSTRAJECTORIES = 'PEMPEM/PEMPEM_data.csv'
+PATH_TO_RAW_GPSTRAJECTORIES = 'WorldBank/coordinates_OSM_FULL_0609.csv' #PEMPEM: PEMPEM_data, #WB (eStrada as base, OSM as trajectories): coordinates_OSM_FULL_0609 #WB (OSM as base, eStrada as trajectories): coordinates_ESTRADA_FULL_0609 
+
 FILE_IDS_USED = range(0,5)  #PEMPEM: range(0,2656), #WB (eStrada as base, OSM as trajectories): range(0,8001) #WB (OSM as base, eStrada as trajectories): range(0,1101)
-MERGING = False
+MERGING = True
 
 if MERGING: 
     #######################################
