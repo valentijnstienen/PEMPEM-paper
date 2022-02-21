@@ -154,7 +154,7 @@ def createSubtrips(filename, file_ID, merging, fname = None):
         
             # 2. Determine streak ids that should be considered as up (just waiting below MAX_DOWN_TIME minutes, e.g., traffic light)
             df_temp["timediff"] = (df_temp['DateTime'] - df_temp['DateTime'].shift()).dt.total_seconds() # time difference between GPS points
-            temp_df = df_temp.groupby(['streak_id', 'Up']).sum(['timediff']).reset_index()
+            temp_df = df_temp.groupby(['streak_id', 'Up']).agg({'timediff': 'sum'}).reset_index()
             l = list(temp_df[(temp_df.Up == False) & (temp_df.timediff <= MAX_DOWN_TIME)].streak_id)
             # Update the df_temp (in particular the Up column)
             idx = df_temp[df_temp.streak_id.isin(l)].index
