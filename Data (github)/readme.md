@@ -50,3 +50,6 @@ The pre-processing algorithm is built-in the original application. In other word
 ```
 $ python CreateTraces_Preprocessing.py
 ```
+Note that once you have run it here, you may want to ensure (in SETTINGS.py), that this pre-processing algorithm has already ran. 
+
+[a relative link](SETTINGS.py)
