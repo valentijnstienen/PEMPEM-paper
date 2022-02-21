@@ -30,4 +30,5 @@ else:
     SAVE_STOPS = False
     FNAME_STOPS = 'PEMPEM/PEMPEM_stops_'+str(MAX_DOWN_TIME)+'_'+str(DOWN_SPEED)+'_'+str(MAX_SPEED)+'_'+str(MIN_ACF_DISTANCE_COVERED)+'_'+str(MIN_TIME_BETWEEN_POINTS)+'_'+str(MIN_SUBTRIP_LENGTH)+'_ARTCOURSE_DIRECTION_'+str(ALWAYS_COURSE)+'_1311.csv'
     #######################################
-
+    
+    # If using folders, make sure they exist before trying to open them! 
