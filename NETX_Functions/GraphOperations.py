@@ -1351,12 +1351,12 @@ def graph_from_place(
     if isinstance(query, (str, dict)):
         # if it is a string (place name) or dict (structured place query), then
         # it is a single place
-        gdf_place = geocoder.geocode_to_gdf(
+        gdf_place = ox.geocoder.geocode_to_gdf(
             query, which_result=which_result, buffer_dist=buffer_dist
         )
     elif isinstance(query, list):
         # if it is a list, it contains multiple places to get
-        gdf_place = geocoder.geocode_to_gdf(query, buffer_dist=buffer_dist)
+        gdf_place = ox.geocoder.geocode_to_gdf(query, buffer_dist=buffer_dist)
     else:
         raise TypeError("query must be dict, string, or list of strings")
 
@@ -1365,7 +1365,7 @@ def graph_from_place(
     utils.log("Constructed place geometry polygon(s) to query API")
 
     # create graph using this polygon(s) geometry
-    G = graph_from_polygon(
+    G = ox.graph.graph_from_polygon(
         polygon,
         network_type=network_type,
         simplify=simplify,
