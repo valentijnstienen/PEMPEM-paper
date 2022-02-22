@@ -15,7 +15,7 @@ An example of an initial graph is shown below.
 
 
 
-Now, we might know that a truck has been driving a particular route that has been tracked by a GPS tracker. In other words, we might have a GPS trace that visualliy looks as follows: 
+Now, we might know that a truck has been driving a particular route that has been tracked by a GPS tracker. In other words, we might have a GPS trace that visually looks as follows: 
 
 <img src="readmefigures/exampleTrajectory.png" width="600">
 
