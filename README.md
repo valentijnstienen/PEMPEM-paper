@@ -9,7 +9,7 @@ In this paper we discuss how to extend a given initial graph with the informatio
 
 An example of an initial graph is shown below. 
 
-![alt text](readmefigures/exampleTrajectory.png | width=50px)
+![alt text](readmefigures/exampleTrajectory.png|width=50px)
 
 
 
