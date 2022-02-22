@@ -42,4 +42,4 @@ $ python mainRun.py
 ```
 
 ## Results
-The results that are obtained and used in the paper can be visualized on [](http://network-extension-app.herokuapp.com).
+The results that are obtained and used in the paper can be visualized on [here](http://network-extension-app.herokuapp.com).
