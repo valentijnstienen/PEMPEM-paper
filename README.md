@@ -13,4 +13,6 @@ If your raw data needs pre-processing (most likely), make sure you verify (adjus
 ## Running the algorithm
 Before running the algorithm, you need to define the settings of the algorithm ([SETTINGS.py](https://github.com/valentijnstienen/PEMPEM-paper/tree/main/SETTINGS.py)). After filling in these settings, you can run the algorithm by executing the following commands:
 
-`$ python mainRun.py`
+```
+$ python mainRun.py
+```
