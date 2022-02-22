@@ -40,3 +40,6 @@ Before running the algorithm, you need to define the settings of the algorithm (
 ```
 $ python mainRun.py
 ```
+
+## Results
+The results that are obtained and used in the paper can be visualized on [](http://network-extension-app.herokuapp.com).
