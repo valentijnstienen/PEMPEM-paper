@@ -9,6 +9,8 @@ In this paper we discuss how to extend a given initial graph with the informatio
 
 An example of an initial graph is shown below. 
 
+<img src="readmefigures/exampleTrajectory.png" width="600">
+
 ![alt text](readmefigures/exampleTrajectory.png)
 
 
