@@ -9,22 +9,17 @@ In this paper we discuss how to extend a given initial graph with the informatio
 
 An example of an initial graph is shown below. 
 
-<img src="readmefigures/exampleTrajectory.png" width="600">
 
-![alt text](readmefigures/exampleTrajectory.png)
+
 
 
 
 
 Now, we might know that a truck has been driving a particular route that has been tracked by a GPS tracker. In other words, we might have a GPS trace that visualliy looks as follows: 
 
+<img src="readmefigures/exampleTrajectory.png" width="600">
 
-
-
-
-
-
-
+In this paper, we combine this information with the information that is already in the initial graph. If, for instance, this road is not present in the initial graph, we add it, otherwise, we do not (or add parts of it, if applicable). 
 
 The GPS trajectories that are used to extend your initial graph should be saved in a CASE folder within the existing Data folder. An example of such raw GPS trajectory data is shown below:
 
@@ -45,5 +40,3 @@ Before running the algorithm, you need to define the settings of the algorithm (
 ```
 $ python mainRun.py
 ```
-
-
