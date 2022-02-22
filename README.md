@@ -6,6 +6,23 @@ Supplements to the paper "Enrich digital road networks for optimization in remot
 In this paper we discuss how to extend a given initial graph with the information in GPS trajectories. An initial graph can either be 
 
 
+
+An example of an initial graph is shown below. 
+
+
+
+
+
+Now, we might know that a truck has been driving a particular route that has been tracked by a GPS tracker. In other words, we might have a GPS trace that visualliy looks as follows: 
+
+
+
+
+
+
+
+
+
 The GPS trajectories that are used to extend your initial graph should be saved in a CASE folder within the existing Data folder. An example of such raw GPS trajectory data is shown below:
 
 | Date                |Latitude|Longitude|Speed  |Course |
