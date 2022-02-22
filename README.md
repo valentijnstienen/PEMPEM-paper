@@ -1,6 +1,6 @@
 # PEMPEM-paper
 Supplements to the paper "Enrich digital road networks for optimization in remote areas using GPS trajectories".
-[//]: <> (Include the authors here)
+[comment]: <> (Include authors)
 
 In this paper we discuss how to extend a given initial graph with the information in GPS trajectories. An initial graph can either be 
 
