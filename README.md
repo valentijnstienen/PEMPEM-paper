@@ -3,9 +3,13 @@ Supplements to the paper "Enrich digital road networks for optimization in remot
 
 [comment]: <> (Include authors)
 
-In this paper we discuss how to extend a given initial graph with the information in GPS trajectories. An initial graph can either be 
 
-
+In this paper we discuss how to extend a given initial graph with the information in GPS trajectories. An initial graph can either be in the form of
+- a region defined by a string (e.g., "timor leste") 
+- a rectangle defined by a list with the form [lon_min, lon_max, lat_min, lat_max] (e.g., [101.85, 102.99, -1.04, -0.18])
+- a polygon defined by a list of points of the form [(lon_1, lat_1), (lon_2, lat_2), ..., (lon_n, lat_n)] (e.g.,: [(101.91454,-0.46966), (103.03708,-0.61819), (102.88269,-1.06313), (102.18326,-0.78009), (101.91454,-0.46966)])
+- a shapefile that can be transformed into a graph defined by its path Include the whole area that may be extended
+- a networkx graph
 
 An example of an initial graph is shown below. 
 
