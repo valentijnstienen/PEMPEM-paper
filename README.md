@@ -9,15 +9,11 @@ In this paper we discuss how to extend a given initial graph with the informatio
 
 An example of an initial graph is shown below. 
 
-
-
-
-
-
+<img src="readmefigures/initial_graph_example.png" width="600">
 
 Now, we might know that a truck has been driving a particular route that has been tracked by a GPS tracker. In other words, we might have a GPS trace that visually looks as follows: 
 
-<img src="readmefigures/exampleTrajectory.png" width="600">
+<img src="readmefigures/trajectory_example.png" width="600">
 
 In this paper, we combine this information with the information that is already in the initial graph. If, for instance, this road is not present in the initial graph, we add it, otherwise, we do not (or add parts of it, if applicable). 
 
