@@ -9,7 +9,7 @@ In this paper we discuss how to extend a given initial graph with the informatio
 
 An example of an initial graph is shown below. 
 
-<img src="readmefigures/initial_graph_example.png" width="600">
+<img src="readmefigures/initial_graph_example.png" width="800">
 
 Now, we might know that a truck has been driving a particular route that has been tracked by a GPS tracker. In other words, we might have a GPS trace that visually looks as follows: 
 
