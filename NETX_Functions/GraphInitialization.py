@@ -7,17 +7,14 @@
 # Load settings
 #exec(open("../SETTINGS.py").read())
 
-import geopandas as gp
 import osmnx as ox
+
+import geopandas as gp
 import pandas as pd
 import networkx as nx
-import time
 import pickle
 import numpy as np
 import os
-import glob
-from pathlib import Path
-import gc
 
 import dash
 import dash_core_components as dcc
@@ -29,19 +26,96 @@ from NETX_Functions.PrintStuff import create_shapefile
 from NETX_Functions.MathOperations import computeLengthLinestring
 from NETX_Functions.TransformGraph import to_undirected
 
-if CASE == 'WorldBank':
-    """ ----------------------------------------------------------------------------"""
-    """ ------------------ CREATE INITIAL GRAPH FOR WORLDBANK CASE ---------------- """
-    """ ----------------------------------------------------------------------------"""
-    network_to_be_graphed = ['OSM', 'ESTRADA']
-    network_to_be_graphed.remove(case)
-    network_to_be_graphed = network_to_be_graphed[0]
+def graph_from_place(query,network_type="all_private",simplify=True,retain_all=False,truncate_by_edge=False,which_result=None,buffer_dist=None,clean_periphery=True,custom_filter=None):
+    """
+    Adjusted from: Boeing, G. 2017. "OSMnx: New Methods for Acquiring, Constructing, Analyzing, and Visualizing Complex Street Networks."
+    Computers, Environment and Urban Systems 65, 126-139. doi:10.1016/j.compenvurbsys.2017.05.004
+
+    Create graph from OSM within the boundaries of some geocodable place(s).
+    The query must be geocodable and OSM must have polygon boundaries for the
+    geocode result. If OSM does not have a polygon for this place, you can
+    instead get its street network using the graph_from_address function, which
+    geocodes the place name to a point and gets the network within some distance
+    of that point. Alternatively, you might try to vary the which_result
+    parameter to use a different geocode result. For example, the first geocode
+    result (ie, the default) might resolve to a point geometry, but the second
+    geocode result for this query might resolve to a polygon, in which case you
+    can use graph_from_place with which_result=2. which_result=None will
+    auto-select the first multi/polygon among the geocoding results.
+    Parameters
+    ----------
+    query : string or dict or list
+        the query or queries to geocode to get place boundary polygon(s)
+    network_type : string
+        what type of street network to get if custom_filter is None. One of
+        'walk', 'bike', 'drive', 'drive_service', 'all', or 'all_private'.
+    simplify : bool
+        if True, simplify the graph topology with the simplify_graph function
+    retain_all : bool
+        if True, return the entire graph even if it is not connected.
+        otherwise, retain only the largest weakly connected component.
+    truncate_by_edge : bool
+        if True, retain nodes outside boundary polygon if at least one of
+        node's neighbors is within the polygon
+    which_result : int
+        which geocoding result to use. if None, auto-select the first
+        multi/polygon or raise an error if OSM doesn't return one.
+    buffer_dist : float
+        distance to buffer around the place geometry, in meters
+    clean_periphery : bool
+        if True, buffer 500m to get a graph larger than requested, then
+        simplify, then truncate it to requested spatial boundaries
+    custom_filter : string
+        a custom network filter to be used instead of the network_type presets,
+        e.g., '["power"~"line"]' or '["highway"~"motorway|trunk"]'. Also pass
+        in a network_type that is in settings.bidirectional_network_types if
+        you want graph to be fully bi-directional.
+    Returns
+    -------
+    G : networkx.MultiDiGraph
+    Notes
+    -----
+    You can configure the Overpass server timeout, memory allocation, and
+    other custom settings via ox.config().
+    """
+    # create a GeoDataFrame with the spatial boundaries of the place(s)
+    if isinstance(query, (str, dict)):
+        # if it is a string (place name) or dict (structured place query), then
+        # it is a single place
+        gdf_place = ox.geocoder.geocode_to_gdf(
+            query, which_result=which_result, buffer_dist=buffer_dist
+        )
+    elif isinstance(query, list):
+        # if it is a list, it contains multiple places to get
+        gdf_place = ox.geocoder.geocode_to_gdf(query, buffer_dist=buffer_dist)
+    else:
+        raise TypeError("query must be dict, string, or list of strings")
+
+    # extract the geometry from the GeoDataFrame to use in API query
+    polygon = gdf_place["geometry"].unary_union
+    ox.utils.log("Constructed place geometry polygon(s) to query API")
+
+    # create graph using this polygon(s) geometry
+    G = ox.graph.graph_from_polygon(
+        polygon,
+        network_type=network_type,
+        simplify=simplify,
+        retain_all=retain_all,
+        truncate_by_edge=truncate_by_edge,
+        clean_periphery=clean_periphery,
+        custom_filter=custom_filter,
+    )
+
+    ox.utils.log(f"graph_from_place returned graph with {len(G)} nodes and {len(G.edges)} edges")
+    return G, polygon
+
+if area[0][-4:] == '.shp': # initial graph based on shapefile
     """ ----------------------------------------------------------------------------"""
     """ ---------- Shapefile to GeoDF with each linestring added separately ------- """
     """ ----------------------------------------------------------------------------"""
     def segments(curve):
         return list(map(LineString, zip(curve.coords[:-1], curve.coords[1:])))
-    def shape2gdf_full(p, case, make_full):
+    def shape2gdf_full(p, make_full):
         """
         Parameters
         ----------
@@ -55,7 +129,11 @@ if CASE == 'WorldBank':
         if make_full: # If the geometries in the shapefile are linestrings of complete edges, we first need to create a gdf with only the line pieces (much larger)
             gdf_old = gdf_old.dropna(subset=['geometry'])
             gdf = gdf_old.iloc[0:0]
+            print("Total amount of roads that needs to be transformed to points: " + str(len(gdf_old)))
             for i in range(0, len(gdf_old)):
+                if i%(int(len(gdf_old)/100))==0:  
+                    print("Road: " + str(i) + ", " + str(i/(int(len(gdf_old)/100)))+"%", end="\r")
+                
                 # Find the segments of the linestring
                 segments_line = segments(gdf_old.loc[i,'geometry'])
                 # Extract geometry
@@ -66,13 +144,14 @@ if CASE == 'WorldBank':
                 gdf.geometry = old_geom + segments_line
         else: gdf = gdf_old
         # Save new geodataframe (use pickle)
-        with open("Results/_TEMP/GraphInitialization/gdf_new_"+case+".pickle", "wb") as file: pickle.dump(gdf, file)
+        if not os.path.exists("Results/_TEMP/GraphInitialization"): os.makedirs("Results/_TEMP/GraphInitialization")
+        with open("Results/_TEMP/GraphInitialization/gdf_new_"+CASENAME+".pickle", "wb") as file: pickle.dump(gdf, file)
     """ ----------------------------------------------------------------------------"""
 
     """ ----------------------------------------------------------------------------"""
     """ ------------ GeoDF to Graph with each linestring added separately ----------"""
     """ ----------------------------------------------------------------------------"""
-    def convert_gdf2graph(case, make_G_bidi = True):
+    def convert_gdf2graph(make_G_bidi = True):
         """
         Converts geoDF to routable networkx graph. GeoDF must have edges for each line PIECE!
     
@@ -86,7 +165,7 @@ if CASE == 'WorldBank':
         G : graph
         """
         # Load previously saved geodataframe
-        with open("Results/_TEMP/GraphInitialization/gdf_new_"+case+".pickle", "rb") as input_file: gdf = pickle.load(input_file)
+        with open("Results/_TEMP/GraphInitialization/gdf_new_"+CASENAME+".pickle", "rb") as input_file: gdf = pickle.load(input_file)
     
         # Compute the start- and end-position based on linestring 
         gdf['Start_pos'] = gdf.geometry.apply(lambda x: x.coords[0])
@@ -135,15 +214,15 @@ if CASE == 'WorldBank':
             # Add the reverse edge to the graph
             if make_G_bidi: G.add_edge(u_for_edge = v, v_for_edge = u, **dict_row)
     
-        with open("Results/_TEMP/GraphInitialization/graph_"+case+".pickle", "wb") as file: pickle.dump(G, file)
+        with open("Results/_TEMP/GraphInitialization/graph_"+CASENAME+".pickle", "wb") as file: pickle.dump(G, file)
     """ ----------------------------------------------------------------------------"""
 
     """ ----------------------------------------------------------------------------"""
     """ -------------- Simplify the graph and add relevant attributes  -------------"""
     """ ----------------------------------------------------------------------------"""
-    def create_final_initial_graph(case):
+    def create_final_initial_graph():
         # Load previously saved graph
-        with open("Results/_TEMP/GraphInitialization/graph_"+case+".pickle", "rb") as input_file: G = pickle.load(input_file)
+        with open("Results/_TEMP/GraphInitialization/graph_"+CASENAME+".pickle", "rb") as input_file: G = pickle.load(input_file)
     
         # Simplify graph
         G = ox.simplification.simplify_graph(G, strict=True, remove_rings=False)
@@ -165,20 +244,22 @@ if CASE == 'WorldBank':
             ind += 1
     
         # Save the final initial graph
-        if not os.path.exists("../Results/"+CASE+"/"+CASENAME): os.makedirs("../Results/"+CASE+"/"+CASENAME)
-        with open("Results/"+CASE+"/"+CASENAME+"/graph_0-0_"+case+"_1309.pickle", "wb") as file: pickle.dump(G, file)
+        if not os.path.exists("Results/"+CASE+"/"+CASENAME): os.makedirs("Results/"+CASE+"/"+CASENAME)
+        with open("Results/"+CASE+"/"+CASENAME+"/graph_0-0.pickle", "wb") as file: pickle.dump(G, file)
     """ ----------------------------------------------------------------------------"""
-    # Find the Graph object (NetworkX)
-    if network_to_be_graphed == 'ESTRADA': shape2gdf_full('Data/'+CASE+'/_Shapefiles/roads.shp', case = 'ESTRADA', make_full = True)
-    else: shape2gdf_full('Data/'+CASE+'/_Shapefiles/march22_osm_recent.shp', case = 'OSM', make_full = True)
-    convert_gdf2graph(case = network_to_be_graphed, make_G_bidi = True)
-    create_final_initial_graph(case = network_to_be_graphed)
+    
+    # Transform shapefile to graph object
+    shape2gdf_full(area[0], make_full = True)
+    convert_gdf2graph(make_G_bidi = True)
+    create_final_initial_graph()
 
     # Find the polygon object when the area is specified by a region (as a string)
-    if type(area) == str: _, ch_polygon_1 = ox.graph.graph_from_place(area, simplify = True, retain_all = True, truncate_by_edge = True, clean_periphery = True)
+    _, ch_polygon_1 = graph_from_place(area[1], simplify = True, retain_all = True, truncate_by_edge = True, clean_periphery = True)
+
     # Save the polygon information
     with open("Results/"+CASE+"/"+CASENAME+"/polygon_0-0.pickle", "wb") as file: pickle.dump(ch_polygon_1, file)
     with open("Results/"+CASE+"/"+CASENAME+"/PolygonInfo.txt", "w") as output: output.write(str(ch_polygon_1))
+
     # Plot the polygon(s) that is used
     fig = go.Figure()
     try: # when the area consists of multiple polygons
@@ -192,23 +273,20 @@ if CASE == 'WorldBank':
     fig.update_layout(mapbox1 = dict(center = dict(lat=y[0], lon=x[0]), accesstoken = mapbox_accesstoken, zoom = 10),margin = dict(t=10, b=0, l=10, r=10),showlegend=False,mapbox_style="satellite")
     # Save the map
     fig.write_html("Results/"+CASE+"/"+CASENAME+"/Visual.html")
-    
+
     # Save the graph as shapefile  
-    with open("Results/"+CASE+"/"+CASENAME+"/graph_0-0_"+network_to_be_graphed+"_1309.pickle", "rb") as input_file: G = pickle.load(input_file) #
+    with open("Results/"+CASE+"/"+CASENAME+"/graph_0-0.pickle", "rb") as input_file: G = pickle.load(input_file) #
     if two_way: G = to_undirected(G)
     nodes, edges = ox.graph_to_gdfs(G)
     if not os.path.exists("Results/"+CASE+"/"+CASENAME+"/_Shapefiles (Start)"): os.makedirs("Results/"+CASE+"/"+CASENAME+"/_Shapefiles (Start)")
-    create_shapefile(nodes, "Results/"+CASE+"/"+CASENAME+"/_Shapefiles (Start)/"+network_to_be_graphed[0]+"_nodes_1309.shp")
-    create_shapefile(edges, "Results/"+CASE+"/"+CASENAME+"/_Shapefiles (Start)/"+network_to_be_graphed[0]+"_edges_1309.shp")
-    """ ----------------------------------------------------------------------------"""   
-else: # CASE == PEMPEM
+    create_shapefile(nodes, "Results/"+CASE+"/"+CASENAME+"/_Shapefiles (Start)/"+CASENAME[0]+"_nodes.shp")
+    create_shapefile(edges, "Results/"+CASE+"/"+CASENAME+"/_Shapefiles (Start)/"+CASENAME[0]+"_edges.shp")
     """ ----------------------------------------------------------------------------"""
-    """ -------------------- CREATE INITIAL GRAPH FOR PEMPEM CASE ------------------"""
-    """ ----------------------------------------------------------------------------"""
+else: # Initial graph is not a shapefile
     # We start creating the initial graph using the OSMnx package. We also want to have a polygon that can be used for checking whether a GPS trace is within the scope of the case. 
     if type(area) == str: # Area is specified by a region (as a string)
         # Create initial graph
-        initial_G, ch_polygon_1 = ox.graph.graph_from_place(area, simplify = True, retain_all = True, truncate_by_edge = True, clean_periphery = True)
+        initial_G, ch_polygon_1 = graph.graph_from_place(area, simplify = True, retain_all = True, truncate_by_edge = True, clean_periphery = True)
     elif type(area[0]) == tuple: # Area is a polygon
         # Create Polygon object
         ch_polygon_1 = Polygon([Point(x) for x in area])
@@ -266,3 +344,5 @@ else: # CASE == PEMPEM
     create_shapefile(nodes, "Results/"+CASE+"/"+CASENAME+"/_Shapefiles (Start)/start_nodes.shp")
     create_shapefile(edges, "Results/"+CASE+"/"+CASENAME+"/_Shapefiles (Start)/start_edges.shp") 
     """ ----------------------------------------------------------------------------"""
+
+

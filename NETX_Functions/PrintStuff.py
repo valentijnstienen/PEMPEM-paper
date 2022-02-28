@@ -2,9 +2,6 @@ import plotly.graph_objects as go
 import osmnx as ox
 import numpy as np
 
-#from GraphOperations import getCloseEdges
-mapbox_accesstoken = 'pk.eyJ1IjoidmFsZW50aWpuc3RpZW5lbiIsImEiOiJja2FiNHR0azcxM2RiMnNtdHBza2Mxd2FkIn0.R729nTcramuEJs1Iv73lRw'
-
 def addGraph(fig_graph, G, color, only_nodes = False, include_existing = False):
     """
     Extend the map on fig_graph with the nodes and edges of graph G.
@@ -44,9 +41,10 @@ def addGraph(fig_graph, G, color, only_nodes = False, include_existing = False):
         new_nodes = nodes.loc[list(set(list(new_edges.u) + list(new_edges.v)))]
     
         # Print the new edges
+        print("The newly added (explicitly) edges:")
         print(new_nodes)
         print(new_edges)
-        print("Total length added by the algorithm: " + str(new_edges['length'].sum()))
+        print("Total length added explicitly by the algorithm: " + str(new_edges['length'].sum()))
 
     
         # Create lists of all coordinates of all the new/old edges
