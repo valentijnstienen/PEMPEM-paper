@@ -99,7 +99,6 @@ def addGraph(fig_graph, G, color, only_nodes = False, include_existing = False):
 
 
 def create_shapefile(gdf, filename):
-
     
     try: gdf['osmid'] = [str(l) for l in gdf['osmid']]
     except: a = 1
@@ -107,44 +106,14 @@ def create_shapefile(gdf, filename):
     try:
         a = gdf.x
         attributes = ['x','y', 'lon', 'lat', 'ref', 'highway']
-
         for attr in attributes:
             try: gdf[attr] = [str(l) for l in gdf[attr]]
             except: a = 1
-        
-        #try: gdf = gdf.drop(['lon', 'lat', 'ref', 'highway'], axis=1)
-        #except: gdf = gdf.drop(['lon', 'lat'], axis=1)
     except: 
-        attributes = ['osm_type', 'highway', 'oneway', 'surface', 'access', 'junction', 'name', 'old_name', 'bridge', 'layer', 'accuracy', 'name:etymo', 'email', 'descriptio', 'loc_name', 'PFM:RoadID', 'PFM:garmin', 'smoothness', 'est_width', 'lanes', 'maxspeed','lanes:back', 'lanes:forw', 'tracktype', 'bicycle', 'foot', 'horse', 'sac_scale', 'trail_visi', 'mtb:scale', 'ford', 'maxheight','motor_vehi', 'width', 'barrier', 'service', 'waterway', 'check_date', 'import', 'cutting', 'segregated', 'wheelchair', 'abandoned:','abandone_1', 'cycleway', 'sidewalk', 'embankment', 'lit', 'tunnel','Observatio', 'seasonal', 'wikidata', 'ref', 'start_date', 'alt_name','name:en', 'mtb:scale:', 'covered', 'intermitte', 'noname', 'crossing','footway', 'bridge:str', 'official_n', 'man_made', 'incline','informal']
+        attributes = ['Start_pos', 'End_pos', 'osm_type', 'highway', 'oneway', 'surface', 'access', 'junction', 'name', 'old_name', 'bridge', 'layer', 'accuracy', 'name:etymo', 'email', 'descriptio', 'loc_name', 'PFM:RoadID', 'PFM:garmin', 'smoothness', 'est_width', 'lanes', 'maxspeed','lanes:back', 'lanes:forw', 'tracktype', 'bicycle', 'foot', 'horse', 'sac_scale', 'trail_visi', 'mtb:scale', 'ford', 'maxheight','motor_vehi', 'width', 'barrier', 'service', 'waterway', 'check_date', 'import', 'cutting', 'segregated', 'wheelchair', 'abandoned:','abandone_1', 'cycleway', 'sidewalk', 'embankment', 'lit', 'tunnel','Observatio', 'seasonal', 'wikidata', 'ref', 'start_date', 'alt_name','name:en', 'mtb:scale:', 'covered', 'intermitte', 'noname', 'crossing','footway', 'bridge:str', 'official_n', 'man_made', 'incline','informal']
         for attr in attributes:
             try: gdf[attr] = [str(l) for l in gdf[attr]]
             except: a = 1
-        
-        
-        
-        try: gdf['Start_pos'] = [str(l) for l in gdf['Start_pos']]
-        except: a = 1
-        try: gdf['End_pos'] = [str(l) for l in gdf['End_pos']]
-        except: a = 1
-        # try: gdf['access'] = [str(l) for l in gdf['access']]
-        # except: a = 1
-        # try: gdf['service'] = [str(l) for l in gdf['service']]
-        # except: a = 1
-        # try: gdf['ref'] = [str(l) for l in gdf['ref']]
-        # except: a = 1
-        # try: gdf['junction'] = [str(l) for l in gdf['junction']]
-        # except: a = 1
-        # try: gdf['width'] = [str(l) for l in gdf['width']]
-        # except: a = 1
-        # try: gdf['tunnel'] = [str(l) for l in gdf['tunnel']]
-        # except: a = 1
-        # try: gdf['maxspeed'] = [str(l) for l in gdf['maxspeed']]
-        # except: a = 1
-        # try: gdf['bridge'] = [str(l) for l in gdf['bridge']]
-        # except: a = 1
-        # try: gdf['lanes'] = [str(l) for l in gdf['lanes']]
-        # except: a = 1
-        #gdf['est_width'] = [str(l) for l in gdf['est_width']]
         
         try: gdf = gdf.drop(['close_to_point_start', 'close_to_point_end'], axis=1)
         except: a = 1

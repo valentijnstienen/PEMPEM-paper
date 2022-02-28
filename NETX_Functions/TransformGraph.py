@@ -26,13 +26,6 @@ def to_undirected(G):
     # Create the unique ID
     edges["period"] = edges['mini'].astype(str) + edges['min'] + edges['maxi'].astype(str) + edges['min'] + edges["key"].astype(str)  + edges['min']+ edges["length"].round(6).astype(str)
     
-    
-    # for j in edges.period:
-    #   print(j)
-    
-    #print(edges[(edges.u == '211834') | (edges.v == '211834')])
-    
-    
     # For each edge, find the edges that occur not twice in the dataset (back and forth). Here, possible problems may arise when undirectirizing a graph
     unique_edge_IDs = list(edges.period)
     duplicates=[]
@@ -41,7 +34,7 @@ def to_undirected(G):
         if unique_edge_IDs.count(i)!=2:
             duplicates.append(i)
         t +=1
-    print(str(len(duplicates)) +' edges may cause problems.')
+    print(str(len(duplicates)) +' edges MAY cause problems.')
     duplicates.sort()
     # Remove the double self-edges
     for i in duplicates:
@@ -56,11 +49,9 @@ def to_undirected(G):
             try: 
                 if round(G.edges[u, v, 1]['length'],6) == float(z[3]):
                     G.remove_edge(u, v, 1) 
-                    #print(i)
             except:
-                #print(i)
                 # No reverse edge exists, do nothing
-                a = 1#print("No reverse edge exists, do not do anything..")
+                a = 1
         else: 
             # Check if there is an opposite edge 
             selected_edges = [(uu,vv,kk,e['length']) for uu,vv,kk,e in G.edges(keys = True, data=True) if (uu == v) & (vv == u) & (round(e['length'],6) == float(z[3]))]
@@ -69,10 +60,6 @@ def to_undirected(G):
             if len(selected_edges) > 0: 
                 G.remove_edge(selected_edges[0][0], selected_edges[0][1], selected_edges[0][2]) 
             else: a = 0
-                #print(i)
-            
-            
-            
     
     # Start creating the undirected graph
     graph_class = G.to_undirected_class()
@@ -86,33 +73,5 @@ def to_undirected(G):
     G_new.add_edges_from((u, v, key, deepcopy(data)) for u, nbrs in G._adj.items() for v, keydict in nbrs.items() for key, data in keydict.items())
     return G_new
 """ ----------------------------------------------------------------------------"""
-#with open("Results/"+CASE+"/"+CASENAME+"/graph_0-0_ESTRADA_0609.pickle", "rb") as input_file: G = pickle.load(input_file) # Start file ESTRADA
-#with open("Results/"+CASE+"/"+CASENAME+"/graph_0-0_OSM_1309.pickle", "rb") as input_file: G = pickle.load(input_file) # Start file OSM
-#with open(r"Results/WorldBank/TimorLeste/30-30+75-75+10 OSM + ESTRADA/graph_0-1100.pickle", "rb") as input_file: G = pickle.load(input_file) # End file OSM (OSM + ESTRADA)
-#with open(r"Results/WorldBank/TimorLeste/30-30+75-75+10 ESTRADA + OSM/graph_0-8000.pickle", "rb") as input_file: G = pickle.load(input_file) # End file ESTRADA (ESTRADA + OSM)
-
-# TEMPORARY
-#with open(r"Results/WorldBank/TimorLeste/30-30+75-75+10/graph_0-1100.pickle", "rb") as input_file: G = pickle.load(input_file) # End file ESTRADA (ESTRADA + OSM)
-
-# nodes, edges = ox.graph_to_gdfs(G)
-# print(nodes)
-# print(edges)
-#
-# G_new = to_undirected(G)
-#
-# nodes, edges = ox.graph_to_gdfs(G_new)
-# print(nodes)
-# print(edges)
-
-# Create and save as shapefiles
-#create_shapefile(nodes, "Results/WorldBank/TimorLeste/_Shapefiles (Start)/E_nodes_1309.shp")
-#create_shapefile(edges, "Results/WorldBank/TimorLeste/_Shapefiles (Start)/E_edges_1309.shp")
-#create_shapefile(nodes, "Results/WorldBank/TimorLeste/_Shapefiles (Start)/O_nodes_1309.shp")
-#create_shapefile(edges, "Results/WorldBank/TimorLeste/_Shapefiles (Start)/O_edges_1309.shp")
-#create_shapefile(nodes, "Results/WorldBank/TimorLeste/30-30+75-75+10 ESTRADA + OSM/_Shapefiles/EO_nodes_1309.shp")
-#create_shapefile(edges, "Results/WorldBank/TimorLeste/30-30+75-75+10 ESTRADA + OSM/_Shapefiles/EO_edges_1309.shp")
-#create_shapefile(nodes, "Results/WorldBank/TimorLeste/30-30+75-75+10 OSM + ESTRADA/_Shapefiles/OE_nodes_1309.shp")
-#create_shapefile(edges, "Results/WorldBank/TimorLeste/30-30+75-75+10 OSM + ESTRADA/_Shapefiles/OE_edges_1309.shp")
 """ ----------------------------------------------------------------------------"""
-""" ----------------------------------------------------------------------------"""
-""" ----------------------------------------------------------------------------"""
+
