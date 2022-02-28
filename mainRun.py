@@ -48,9 +48,7 @@ if preProcessTrajectories: exec(open("Data/CreateTraces_Preprocessing.py").read(
 """ -------------- Load the pre-processed GPS trajectories (GPS traces) -------------"""
 """ ---------------------------------------------------------------------------------"""
 # Load complete dataset
-if CASE == "PEMPEM": points = pd.read_csv("Data/PEMPEM/PEMPEM_subtrips_125_3_80_10_5_5_ARTCOURSE_DIRECTION_NOTALWAYS_0609.csv", sep = ";", index_col = 0, low_memory=False)
-elif CASE == "WorldBank": points = pd.read_csv("Data/WorldBank/WorldBank_subtrips_0609_"+case+".csv", sep = ";", index_col = 0, low_memory=False)    
-else: print("No data found for this case! ") 
+points = pd.read_csv(PATH_TO_PRE_PROCESSED_TRAJECTORIES, sep = ";", index_col = 0, low_memory=False)
 """ -------------------------------- Shuffle Data -----------------------------------"""
 counts = list(points['ID'].value_counts().sort_index(axis = 0))
 ids = list(points['ID'].unique())
@@ -61,11 +59,6 @@ if shuf:
         l += [i]*counts[ind]
         ind+=1
     points['ID'] = l
-if not shuf: 
-    with open("ID_list_"+str(SEED)+"0.txt", "w") as output: output.write(str(ids))
-else: 
-    with open("ID_list_"+str(SEED)+".txt", "w") as output: output.write(str(ids))
-
 """ ---------------------------------------------------------------------------------"""
 # Find specific part of data that is used.
 points = points[points["ID"].isin(new_ids)]
@@ -102,24 +95,13 @@ uniqueIDs = points.ID.unique()
 # Adjust start of existing_ids to the ones that are actually in the dataset. Add the initial graph to the possible ids (to be able to load it)
 if existing_ids != [0]: existing_ids = [0] + [existing_ids[-1]]
 
-# WorldBank
-if CASE == 'WorldBank':
-    network_to_be_graphed = ['OSM', 'ESTRADA']
-    network_to_be_graphed.remove(case)
-    network_to_be_graphed = network_to_be_graphed[0]
-
 """ ---------------------------------------------------------------------------------"""
 """ ----------------------------- Load the initial graph ----------------------------"""
 """ ---------------------------------------------------------------------------------"""
 if (len(existing_ids) == 1) & (existing_ids[0] == 0):
     # Load data
-    if CASE == 'WorldBank': 
-        with open(r"Results/"+CASE+"/"+CASENAME+"/graph_0-0_"+network_to_be_graphed+"_1309.pickle", "rb") as input_file: G = pickle.load(input_file) #TODO WORLDBANK
-    else: # CASE == 'PEMPEM' 
-        with open(r"Results/"+CASE+"/"+CASENAME+"/graph_0-0.pickle", "rb") as input_file: G = pickle.load(input_file) 
-
-    # Load polygon
-    with open(r"Results/"+CASE+"/"+CASENAME+"/polygon_0-0.pickle", "rb") as input_file: ch_polygon_1 = pickle.load(input_file)
+    with open(r"Results/"+CASE+"/"+CASENAME+"/graph_0-0.pickle", "rb") as input_file: G = pickle.load(input_file) 
+    with open(r"Results/"+CASE+"/"+CASENAME+"/polygon_0-0.pickle", "rb") as input_file: ch_polygon_1 = pickle.load(input_file) # Load polygon
 
     # Remove all old graphs/polygons
     for f in Path('Results/'+CASE+'/'+CASENAME+'/'+ set_string).glob('*.pickle'):
@@ -128,6 +110,7 @@ if (len(existing_ids) == 1) & (existing_ids[0] == 0):
 else:
     with open(r"Results/"+CASE+"/"+CASENAME+"/" + set_string + "/graph_"   + str(existing_ids[0]) + "-"+ str(str(existing_ids[len(existing_ids)-1])) + ".pickle", "rb") as input_file: G = pickle.load(input_file)
     with open(r"Results/"+CASE+"/"+CASENAME+"/" + set_string + "/polygon_" + str(existing_ids[0]) + "-"+ str(str(existing_ids[len(existing_ids)-1])) + ".pickle", "rb") as input_file: ch_polygon_1 = pickle.load(input_file)
+
 # Define the coordinate reference system used throughout the algorithm
 used_crs = G.graph["crs"]
 print("initial_G loaded.... CRS: " + str(used_crs))   
@@ -178,7 +161,6 @@ for new_id in new_ids:
     if len(G.edges) > 0:
         # Classify the edges of the new graph that are within the ch_polygon, set these equal to True (reset each time)
         nodes, edges = ox.graph_to_gdfs(G, nodes = True, node_geometry = True)
-        
         edges_used = edges[edges.intersects(used_polygon) | edges.within(used_polygon)]
         nodes_used_extended = list(set(list(edges_used.u) + list(edges_used.v)))
     else: nodes_used_extended = [] # Could happen, for instance, when starting with an empty graph
@@ -236,12 +218,8 @@ if save:
 # Create and save as shapefiles
 if save: 
     if not os.path.exists("Results/"+CASE+"/"+CASENAME+"/"+set_string+"/_Shapefiles"): os.makedirs("Results/"+CASE+"/"+CASENAME+"/"+set_string+"/_Shapefiles")
-    if CASE == 'WorldBank':
-        create_shapefile(nodes, "Results/"+CASE+"/"+CASENAME+"/"+set_string+"/_Shapefiles/"+network_to_be_graphed[0]+case[0]+"_nodes.shp")
-        create_shapefile(edges, "Results/"+CASE+"/"+CASENAME+"/"+set_string+"/_Shapefiles/"+network_to_be_graphed[0]+case[0]+"_edges.shp")
-    else:
-        create_shapefile(nodes, "Results/"+CASE+"/"+CASENAME+"/"+set_string+"/_Shapefiles/SF_nodes.shp")
-        create_shapefile(edges, "Results/"+CASE+"/"+CASENAME+"/"+set_string+"/_Shapefiles/SF_edges.shp")
+    create_shapefile(nodes, "Results/"+CASE+"/"+CASENAME+"/"+set_string+"/_Shapefiles/SF_nodes.shp")
+    create_shapefile(edges, "Results/"+CASE+"/"+CASENAME+"/"+set_string+"/_Shapefiles/SF_edges.shp")
 
 # Print the runtime
 print(str(time.time() - start) + " seconds have passed.")
@@ -261,7 +239,7 @@ if plot:
 
     # Draw the graph
     # If we are editing, only draw the relevant piece (that corresponds to the ID) to the map
-    if editing & len(new_ids) > 0:
+    if editing & (len(new_ids) > 0):
         # Determine the used_polygon. If necessary, adjust the buffer here. 
         used_polygon = ox.projection.project_geometry(used_polygon.buffer(0), crs = used_crs,  to_latlong = True)[0]
         # Find all nodes and edges that are within this polygon. These will all be visualized
@@ -281,7 +259,7 @@ if plot:
         fig.write_html("Results/"+CASE+"/"+CASENAME+"/"+set_string +"/_HTMLs/" + str(existing_ids[0]) + "_"+ str(str(existing_ids[len(existing_ids)-1])) + ".html")
 
     # If we are editing and there is at least one new ID, we plot the GPS points corresponding to the new IDs. Note that we do not want to save these dots in the saved map.
-    if editing & len(new_ids) > 0: 
+    if editing & (len(new_ids) > 0): 
         fig.add_trace(go.Scattermapbox(mode='markers', lat=points_new.Latitude, lon=points_new.Longitude, visible = True, text = 'Index: ' + points_new.index.astype(str)+ ', Course: '+points_new['Course'].astype(str), marker = {'size' : 10, 'opacity': 1, 'color': 'pink', 'allowoverlap': True}))
 
     ############################################################ HIGHLIGHT AN EDGE (NOT TESTED YET) ################################################################
@@ -321,15 +299,6 @@ if plot:
         for poly in [used_polygon]: #[]
             x, y = poly.exterior.coords.xy
             fig.add_trace(go.Scattermapbox(mode='lines', lat=y.tolist(), lon=x.tolist(), visible = True,  marker = {'size' : 15, 'color': 'pink', 'allowoverlap': True}))
-
-    # try:
-    #     for poly in ch_polygon_1: #[]
-    #         x, y = poly.exterior.coords.xy
-    #         fig.add_trace(go.Scattermapbox(mode='lines', lat=y.tolist(), lon=x.tolist(), visible = True,  marker = {'size' : 15, 'color': 'pink', 'allowoverlap': True}))
-    # except:
-    #     for poly in [ch_polygon_1]: #[]
-    #         x, y = poly.exterior.coords.xy
-    #         fig.add_trace(go.Scattermapbox(mode='lines', lat=y.tolist(), lon=x.tolist(), visible = True,  marker = {'size' : 15, 'color': 'pink', 'allowoverlap': True}))
     ################################################################################################################################################################
 
     # Launch app
