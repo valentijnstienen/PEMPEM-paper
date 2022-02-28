@@ -1,0 +1,8 @@
+dash==1.17.0
+geopandas==0.8.1
+networkx==2.5
+numpy==1.19.4
+osmnx==0.16.1
+pandas==1.1.4
+plotly==4.12.0
+Shapely==1.7.1
