@@ -327,7 +327,7 @@ def createSubtrips(filename, file_ID, merging, fname = None):
     
         subIDs_rem = list(counttab.index[counttab >= MIN_SUBTRIP_LENGTH])
         subtrips = subtrips[subtrips["tripID"].isin(subIDs_rem)].reset_index(drop = True)
-        #df_fromto = df_fromto[df_fromto["ID"].isin(subIDs_rem)].reset_index(drop = True)
+        df_fromto = df_fromto[df_fromto["ID"].isin(subIDs_rem)].reset_index(drop = True)
 
         # Assign a unique number to each trip id in the final dataset. 
         i = subtrips.tripID
