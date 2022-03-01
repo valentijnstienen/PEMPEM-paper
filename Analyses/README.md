@@ -20,7 +20,15 @@ $ python RoutingResults.py
 
 
 
-After having created this new dataset, we can use it to determine some performance indicators of the new network. Also here, we can choose between different indicators. The settings are stored in the file itself: [ResultsSP.py](https://github.com/valentijnstienen/PEMPEM-paper/blob/main/Analyses/ResultsSP.py). This means that you need to open this file and specify your wishes here. Then, execute the following commands in your command line:
+After having created this new dataset, we can use it to determine some performance indicators of the new network. Also here, we can choose between different indicators. 
+
+- **Percentage of shortest paths (SPs) that can be found**: Here, we differentiate between reasons why a shortest could not be found (e.g., due to an unprojectable origin (destination)). 
+- **Plot the points that could not be projected**: This gives insight in the regions where most origins/destination could (not) be projected on the network. 
+- 
+
+
+
+The settings are stored in the file itself: [ResultsSP.py](https://github.com/valentijnstienen/PEMPEM-paper/blob/main/Analyses/ResultsSP.py). This means that you need to open this file and specify your wishes here. Then, execute the following commands in your command line:
 
 ```
 $ python ResultsSP.py
