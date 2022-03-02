@@ -23,7 +23,7 @@ $ python RoutingResults.py
 After having created this new dataset, we can use it to determine some performance indicators of the new network. Also here, we can choose between different indicators. 
 
 - **Percentage of shortest paths (SPs) that can be found**: Here, we differentiate between reasons why a shortest could not be found (e.g., due to an unprojectable origin (destination)). 
-- **Plot the points that could not be projected**: This gives insight in the regions where most origins/destination could (not) be projected on the network. 
+- **Plot the points that could not be projected**: This gives insight in the regions where most origins/destination could (not) be projected on the network. An example of such a plot is given below:
 - 
 
 
