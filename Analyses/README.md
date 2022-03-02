@@ -27,7 +27,7 @@ After having created this new dataset, we can use it to determine some performan
 
 <img src="readmefigures/projectable_points_plot.png" width="600">
 
-- 
+- **Average projection distances**: Compare for both the graphs (initial/extended) the distance from the origin/destination points to their respective projections.
 
 
 
