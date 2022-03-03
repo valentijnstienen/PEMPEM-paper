@@ -16,7 +16,7 @@ where:
 - Similarly, `From_projected_NEW` (`To_projected_NEW`) represents the projection point of the origin (destination) in the extended graph. 
 - `From_projected_distance` (`To_projected_distance`) in the initial graph, and the `From_projected_distance_NEW` (`To_projected_distance_NEW`) in the extended graph, are the final projection distances of the origin (destination) in the initial and extended graph.
 - `Minimal_projection_distance_from`, `Minimal_projection_distance_from_NEW`, `Minimal_projection_distance_to`, `Minimal_projection_distance_to_NEW` .Note that we may not chose to project the origin (destination) on the closest edge. For instance, if a shorter path could be obtained with a different projection (while still satisfying the maximum projection distance threshold). Therefore, we also include the minimum possible distance to an edge. This is used to determine whether it is possible to project on an edge. 
-- Finally, we include the distance between the origins (destinations) in the initial and extended graphs (`Distance_between_from` and `Distance_between_to`). These numbers are used to determine whether OD pairs are similar or different. 
+- Finally, we include the distance between the projected origins (destinations) in the initial and extended graphs (`Distance_between_from` and `Distance_between_to`). These numbers are used to determine whether OD pairs are similar or different. 
 
 Now, to create such a dataset, start with specifying the settings for the analyses (use [SETTINGS_ANALYSES.py](https://github.com/valentijnstienen/PEMPEM-paper/blob/main/Analyses/SETTINGS_ANALYSES.py)). Then, execute the following commands in your command line:
 
