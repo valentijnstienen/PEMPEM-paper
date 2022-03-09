@@ -4,15 +4,15 @@
 SEED = 0
 shuf = False
 #____________________________ Define Case ____________________________#
-CASE = "PEMPEM_2" #"WorldBank" #"PEMPEM" #TODO WORLDBANK # Folder name used for files that uses the specified data
-CASENAME = "PEMPEM_0228" #"TimorLeste_EO"/"SMALL" #TODO WORLDBANK # (Sub)folder name used for files that include case-specific data (see below)
+CASE = "PEMPEM" #"WorldBank" #"PEMPEM" #TODO WORLDBANK # Folder name used for files that uses the specified data
+CASENAME = "PEMPEM_FINAL" #"TimorLeste_EO"/"SMALL" #TODO WORLDBANK # (Sub)folder name used for files that include case-specific data (see below)
 #_____________________________________________________________________#
-preProcessTrajectories = False
+preProcessTrajectories = True
 PATH_TO_PRE_PROCESSED_TRAJECTORIES = "Data/PEMPEM/PEMPEM_subtrips_125_3_80_10_5_5_ARTCOURSE_DIRECTION_False_1311.csv" #"Data/PEMPEM/PEMPEM_subtrips_125_3_80_10_5_5_ARTCOURSE_DIRECTION_False_1311.csv" #"Data/WorldBank/WorldBank_subtrips_0609_OSM.csv" "Data/WorldBank/WorldBank_subtrips_0609_estrada.csv" #TODO WORLDBANK
 #_____________________________________________________________________#
 
 #____________________________ Define Area ____________________________#
-initializeGraph = False
+initializeGraph = True
 if initializeGraph:
     """
     Use one of the following formats:
@@ -33,11 +33,11 @@ if initializeGraph:
 
 #__________________ Scope Settings for the algorithm _________________#
 existing_ids = [0] # when starting: [0]
-new_ids = range(1,3) #PEMPEM: range(1, 14961) # WB(OE): range(1,1101) # WB(EO): range(1,8001) 
+new_ids = range(1, 14961) #PEMPEM: range(1, 14961) # WB(OE): range(1,1101) # WB(EO): range(1,8001) 
 # ____________________________________________________________________#
 
 #______________ Mathematical Settings for the algorithm ______________#
-max_dist_projection = [30, 30]# #\bar{d},\bar{\bar{d}} #TODO WORLDBANK     [30, 30] # [30, 50]           
+max_dist_projection = [30, 50]# #\bar{d},\bar{\bar{d}} #TODO WORLDBANK     [30, 30] # [30, 50]           
 max_bearingdiff_projection = [75, 75] #\bar{alpha},\bar{\bar{alpha}}    
 max_dist_merge = 10 #meters
 two_way = False #TODO WORLDBANK
@@ -55,14 +55,14 @@ dat_range = None# range(531, 536) # Range that specifies the scope (points withi
 #___________________________ Save settings ___________________________#
 load = True # True if you want to load the graph corresponding to the existing ids
 save = True # True if you want to save the graphs/polygons during the run. (RECOMMENDED)
-save_thresh = 100# Save the graph once every [save_thresh] IDs #TODO WORLDBANK
+save_thresh = 500# Save the graph once every [save_thresh] IDs #TODO WORLDBANK
 rest_time = 0#s time the computer can rest after [save_thresh] IDs
 #_____________________________________________________________________#
 
 #________________________ Print/plot settings ________________________#
 viewData = False # Indicates whether you just want to view the initial data
 do_print = False # Indicate whether output should be printed (useful for debugging)
-plot = True # Plot the graph on html
+plot = False # Plot the graph on html
 if plot: editing = True # If we are editing, only draw the relevant piece (that corresponds to the ID) to the map
 #_____________________________________________________________________#
 
