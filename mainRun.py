@@ -1,11 +1,9 @@
-# Date       : 11-01-2021
-# Environment: conda activate ox
-# Location   : cd "Desktop/NETX"
-# Run        : python mainRun.py
-# Package info: /Users/valentijnstienen/anaconda3/envs/ox/lib/python3.8/site-packages
-
 # Load settings
 exec(open("./SETTINGS.py").read())
+
+# Set seed
+import random
+random.seed(SEED)
 
 import osmnx as ox
 import pandas as pd
@@ -14,7 +12,7 @@ import pickle
 import os
 import glob
 import gc
-import random
+
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
@@ -28,8 +26,7 @@ from NETX_Functions.PrintStuff import addGraph, addEdge, create_shapefile
 from NETX_Functions.algorithm import ExtendGraph, ExtendGraph_trajectory, ExtendGraphWithOSM_NEW
 from NETX_Functions.TransformGraph import to_undirected
 
-# Set seed
-random.seed(SEED)
+
 
 # Garbage collector
 gc.collect()
@@ -80,7 +77,7 @@ if viewData:
 """ ---------------------------------------------------------------------------------"""
 if initializeGraph: exec(open("NETX_Functions/GraphInitialization.py").read())
 """ ---------------------------------------------------------------------------------"""
-
+stop
 # Save settings for the algorithm, the last setting will change per ID iteration, for now, set it equal to None
 settings = [max_dist_projection, max_bearingdiff_projection, max_dist_merge, two_way, None, merging_networks]
 
@@ -148,7 +145,7 @@ for new_id in new_ids:
         print("This ID contains points outside the considered region. Therefore, it is skipped. Saved to file.. ")
         # Save the skips to a separate file (for later reference)
         skips += [new_id]
-        with open("SKIPS.txt", "w") as output: output.write(str(skips))
+        with open("Results/"+CASE+"/"+CASENAME+"/" + set_string + "/SKIPS.txt", "w") as output: output.write(str(skips))
         # Add the id to the existing IDs for saving purposes
         existing_ids = existing_ids + [new_id]
         if save & ((new_id+1) % save_thresh == 0):
@@ -173,13 +170,12 @@ for new_id in new_ids:
     # with open("TRIPS.txt", "w") as output: output.write(str(trips))
     
     ################################## EXTEND THE GRAPH #######################################
-    ExtendGraph(G, points_new, settings, MAX_STEP_INPUT = max_step_input, do_print = do_print)  
-    #except: # Keep track of errors
-    #     G = initial_G_extended
-    #     print("Graph could not be extended. Error saved to file.. ")
-    #     errors += [new_id]
-    #     with open("ERRORS.txt", "w") as output:
-    #         output.write(str(errors))
+    try: ExtendGraph(G, points_new, settings, MAX_STEP_INPUT = max_step_input, do_print = do_print)  
+    except: # Keep track of errors
+        print("Graph could not be extended. Error saved to file.. ")
+        errors += [new_id]
+        with open("Results/"+CASE+"/"+CASENAME+"/" + set_string + "/ERRORS.txt", "w") as output:
+            output.write(str(errors))
     ###########################################################################################
     
     # Extend the existing_ids with the now added [new_id]. Necessary for loading the right data if needed
