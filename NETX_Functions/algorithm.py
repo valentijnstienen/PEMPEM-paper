@@ -447,7 +447,7 @@ def ExtendGraph_trajectory(G_proj, tripdf, step, settings, do_print = False):
                 length_deviation = abs(length_existing - length_new_edge)
                               
                 """ __________________________________ MERGING NODES MAY REDUCE THE LENGTH __________________________________"""
-                # It may be the case that we can also travel via an opposite edge to the new node. In other words, an shortest path already existed, but we were not able to traverse this, due to the projection point(s) of the start and end point of the new edge (projected onto different edges). Therefore, we check if an SP exists with a smaller deviation, when using opposite edge(s). Note that we only do this when we are not considering the two-way situations. If two-ways is activated, does not make sense (useless work), because each point is already added in two ways, and such situations will not occur. 
+                # It may be the case that we can also travel via an opposite edge to the new node. In other words, a shortest path already existed, but we were not able to traverse this, due to the projection point(s) of the start and end point of the new edge (projected onto different edges). Therefore, we check if an SP exists with a smaller deviation, when using opposite edge(s). Note that we only do this when we are not considering the two-way situations. If two-ways is activated, does not make sense (useless work), because each point is already added in two ways, and such situations will not occur. 
                 if not settings[3]: 
                     # Check if temp_last_point could be merged. 
                     temp_last_point_mergeable = False

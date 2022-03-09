@@ -550,7 +550,6 @@ def remove_point(G, old_point, do_print = False):
         # Define lists of start and end points of the incoming and outgoing edges
         start_points_incoming_edges = set([incoming_edges[0][0], incoming_edges[1][0]])
         end_points_outgoing_edges = set([outgoing_edges[0][1], outgoing_edges[1][1]])
-        
         # Check if the point can be removed. The points to the "left" and "right" are the same. If so, the old_point can be removed. 
         if start_points_incoming_edges == end_points_outgoing_edges:
             # Remove subedges and node 
@@ -782,7 +781,9 @@ def findProjectionPoint(G, point, close_to_edge, connecting, forward, temp_point
         if close_to_edge is None: 
             # Return the nearest edge (incorporating direction) if there is at least one edge left 
             if len(df) > 0:
-                df = df[df.ClosestDistance == min(df.ClosestDistance)].reset_index(drop=True)  
+                df = df[df.ClosestDistance == min(df.ClosestDistance)].reset_index(drop=True)
+                #df['Edge_string'] = df['Edge'].astype(str)
+                #df.sort_values(by='Edge_string', inplace=True, ignore_index=True)
                 # Define the edge to be returned
                 edge_new = (df.Edge[0][0], df.Edge[0][1], df.Edge[0][2], df.Edge[0][3], df.Edge[0][4])
                 # Ensure that the edge onto which the point is projected now gets indicated as "driven" (True)
@@ -798,10 +799,12 @@ def findProjectionPoint(G, point, close_to_edge, connecting, forward, temp_point
             if len(df) > 0:
                 df['combinedDistance'] = df.ClosestDistance + df.DiffDistanceFromOld
                 df = df[df.combinedDistance == min(df.combinedDistance)].reset_index(drop = True)
+                #df['Edge_string'] = df['Edge'].astype(str)
+                #df.sort_values(by='Edge_string', inplace=True, ignore_index=True)
                 # If mutliple options have the same sum of anomalies, we prefer the one that lies on the same edge as the close_to_point lies. 
                 if any(df.Edge.apply(lambda x: x[0:2]) == close_to_edge[0:2]): df = df[df.Edge.apply(lambda x: x[0:2]) == close_to_edge[0:2]].reset_index(drop=True)
                 # If multiple options remain, choose the one with the smallest distance from the previous point. Another option would be to use ClosestDistance. 
-                df = df[df.DistanceFromOld == min(df.DistanceFromOld)].reset_index(drop = True)  
+                df = df[df.DistanceFromOld == min(df.DistanceFromOld)].reset_index(drop = True)
                 # Define the edge to be returned
                 edge_new = (df.Edge[0][0], df.Edge[0][1], df.Edge[0][2], df.Edge[0][3], df.Edge[0][4])
                 # Ensure that the edges that have been traversed to get to this new point are classified as driven (True)
@@ -880,6 +883,8 @@ def findProjectionPoint(G, point, close_to_edge, connecting, forward, temp_point
         if len(df) > 0:
             df['combinedDistance'] = df.ClosestDistance + df.DiffDistanceFromOld
             df = df[df.combinedDistance == min(df.combinedDistance)].reset_index(drop = True)  
+            #df['Edge_string'] = df['Edge'].astype(str)
+            #df.sort_values(by='Edge_string', inplace=True, ignore_index=True)
             # If mutliple options have the same sum of anomalies, we prefer the one that lies on the same edge as the close_to_point lies. 
             if any(df.Edge.apply(lambda x: x[0:2]) == close_to_edge[0:2]): df = df[df.Edge.apply(lambda x: x[0:2]) == close_to_edge[0:2]].reset_index(drop=True)
             # If multiple options remain, choose the one with the smallest distance. Another option would be to use ClosestDistance. 
@@ -1148,7 +1153,9 @@ def get_nearest_edge_FULL(G, point, indmax, return_geom=False, return_dist=False
         Or a tuple of (u, v, key, geom, dist) if return_geom and return_dist are True.
     """
     # Get the nodes that are within our specific region for this ID. Nodes that still exist (within the original polygon) + nodes that are added
-    new_nodes = list(indmax[0] & G.nodes) + list(set(G.nodes) - set(indmax[1]))
+    #new_nodes = list(indmax[0] & G.nodes) + list(set(G.nodes) - set(indmax[1]))
+    l1, l2 = set(G.nodes), set(indmax[1])
+    new_nodes = list(indmax[0] & G.nodes) + [item for item in l1 if item not in l2]
     
     # Create a subgraph
     edges = G.subgraph(new_nodes).edges(data='geometry', keys = True)
@@ -1158,8 +1165,7 @@ def get_nearest_edge_FULL(G, point, indmax, return_geom=False, return_dist=False
     
     # Compute perpendicular distances and sort the dataframe that will be returned
     edge_distances = [(edge, point.distance(edge[3])) for edge in edges]
-    edge_distances_sorted = sorted(edge_distances, key = lambda x: x[1])
-
+    edge_distances_sorted = sorted(edge_distances, key = lambda x: (x[1], str(x[0])))
     return edge_distances_sorted
 
 """---------------------------------------------- CHECKING FUNCTIONS ---------------------------------------"""
