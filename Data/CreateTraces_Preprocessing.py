@@ -1,8 +1,3 @@
-# Date       : 11-01-2021
-# Environment: conda activate ox
-# Location   : cd "Documents/Uvt/PhD/PEMPEM paper/Code/Create Network (BASE)/Data"
-# Run        : python LoadDataOSM.py
-
 import pandas as pd
 import numpy as np 
 from math import radians, cos, sin, asin, sqrt, atan2, pi
@@ -118,6 +113,7 @@ def createSubtrips(filename, file_ID, merging, fname = None):
         # Load and pre-process complete dataset
         df_full = pd.read_table(filename, sep = ";", usecols=['DateTime', 'Latitude', 'Longitude','Speed','Course', 'ID'])
         df_full = df_full[df_full["ID"].isin(file_ID)]
+        print(str(df_full['ID'].nunique()) + " files are used to create the trips.")
         df_full.Latitude = pd.to_numeric(df_full['Latitude'])
         df_full.Longitude = pd.to_numeric(df_full['Longitude'])
         df = df_full.reset_index(drop=True)
