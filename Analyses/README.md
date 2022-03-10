@@ -30,6 +30,8 @@ Note that you can create such a dataset for an initial and an extended graph. In
 
 - **Average projection distances**: Compare for both the graphs (initial/extended) the distance from the origin/destination points to their respective projections.
 
+- **Average SP length**: Compare for both the graphs (initial/extended) the average length of a shortest path between the given OD pairs.
+
 - **Frequency plots of actual/percentage decreases in SP length**: These plots can be used to get information about the distribution of the magnitude of the differences in shortest path length between the initial and the extended graph.
 
 The settings are stored in the file itself: [ResultsSP.py](https://github.com/valentijnstienen/PEMPEM-paper/blob/main/Analyses/ResultsSP.py). This means that you need to open this file and specify your wishes here. Then, execute the following commands in your command line:
