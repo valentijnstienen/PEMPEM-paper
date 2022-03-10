@@ -15,17 +15,13 @@ where:
 - `From_projected_distance` (`To_projected_distance`) are the final projection distances of the origin (destination) in the given graph.
 - `Minimal_projection_distance_from`, `Minimal_projection_distance_to`. Note that we may not chose to project the origin (destination) on the closest edge. For instance, if a shorter path could be obtained with a different projection (while still satisfying the maximum projection distance threshold). Therefore, we also include the minimum possible distance to an edge. This is used to determine whether it is possible to project on an edge. 
 
-Now, to create such a dataset, start with specifying the settings for the analyses (use [SETTINGS_Analyses.py](https://github.com/valentijnstienen/PEMPEM-paper/blob/main/Analyses/SETTINGS_Analyses.py)). Then, execute the following commands in your command line:
+Now, to create such a dataset for a given graph, start with specifying the settings for the analyses (use [SETTINGS_Analyses.py](https://github.com/valentijnstienen/PEMPEM-paper/blob/main/Analyses/SETTINGS_Analyses.py)). Then, execute the following commands in your command line:
 
 ```
 $ python RoutingResults.py
 ```
 
-
-
-
-
-After having created this new dataset, we can use it to determine some performance indicators of the new network. Also here, we can choose between different indicators. 
+Note that you can create such a dataset for an initial and an extended graph. In such a situation, these datasets can further be used to determine some performance indicators of the new network. We can choose between different indicators. 
 
 - **Percentage of shortest paths (SPs) that can be found**: Here, we differentiate between reasons why a shortest could not be found (e.g., due to an unprojectable origin (destination)). 
 - **Plot the points that could not be projected**: This gives insight in the regions where most origins/destination could (not) be projected on the network. An example of such a plot is given below:
