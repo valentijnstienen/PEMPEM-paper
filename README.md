@@ -1,4 +1,4 @@
-# PEMPEM-paper
+# PemPem-paper
 Supplements to the paper "Enrich digital road networks for optimization in remote areas using GPS trajectories".
 
 [comment]: <> (Include authors)
@@ -31,7 +31,7 @@ The GPS trajectories that are used to extend your initial graph should be saved 
 | ... | ... | ... | ... | ... |
 
 ## Set up the environment
-In order to use this tool, you need to set up the appropriate environment. The packages that are used are stored in ([requirements.txt](https://github.com/valentijnstienen/PEMPEM-paper/tree/main/requirements.txt)). If you use [conda](https://conda.io), you can clone the virtual environments by executing the following code in you command line. Make sure that you first look in the channel conda-forge before turning to the anaconda channel (otherwise conflicts may occur). 
+In order to use this tool, you need to set up the appropriate environment. The packages that are used are stored in ([requirements.txt](https://github.com/valentijnstienen/PemPem-paper/tree/main/requirements.txt)). If you use [conda](https://conda.io), you can clone the virtual environments by executing the following code in you command line. Make sure that you first look in the channel conda-forge before turning to the anaconda channel (otherwise conflicts may occur). 
 
 ```
 $ conda create --name ENV_NAME --file requirements.txt
@@ -39,11 +39,11 @@ $ conda create --name ENV_NAME --file requirements.txt
 
 
 ## Data pre-processing
-If your raw data needs pre-processing (most likely), make sure you verify (adjust when necessary) the settings for the pre-processing algorithm ([Settings_PreprocessingAlgorithm.py](https://github.com/valentijnstienen/PEMPEM-paper/blob/main/Data%20(github)/SETTINGS_PreprocessingAlgorithm.py)) according to your wishes. For more details on the data pre-processing, we refer to the corresponding [Data pre-processing page](https://github.com/valentijnstienen/PEMPEM-paper/tree/main/Data%20(github)).
+If your raw data needs pre-processing (most likely), make sure you verify (adjust when necessary) the settings for the pre-processing algorithm ([Settings_PreprocessingAlgorithm.py](https://github.com/valentijnstienen/PemPem-paper/blob/main/Data%20(github)/SETTINGS_PreprocessingAlgorithm.py)) according to your wishes. For more details on the data pre-processing, we refer to the corresponding [Data pre-processing page](https://github.com/valentijnstienen/PemPem-paper/tree/main/Data%20(github)).
 
 
 ## Running the algorithm
-Before running the algorithm, you need to define the settings of the algorithm ([SETTINGS.py](https://github.com/valentijnstienen/PEMPEM-paper/tree/main/SETTINGS.py)). After filling in these settings, you can run the algorithm by executing the following commands:
+Before running the algorithm, you need to define the settings of the algorithm ([SETTINGS.py](https://github.com/valentijnstienen/PemPem-paper/tree/main/SETTINGS.py)). After filling in these settings, you can run the algorithm by executing the following commands:
 
 ```
 $ python mainRun.py
