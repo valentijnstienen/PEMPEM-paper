@@ -1,5 +1,5 @@
 # PemPem-paper
-Supplements to the paper "Enrich digital road networks for optimization in remote areas using GPS trajectories".
+Supplements to the paper "Enhancing digital road networks for better operations in developing countries".
 
 [comment]: <> (Include authors)
 
