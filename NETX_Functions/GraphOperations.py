@@ -7,6 +7,16 @@ import networkx as nx
 
 """----------------------------------------- GRAPH CHANGING FUNCTIONS --------------------------------------"""
 """---------------------------------------------------------------------------------------------------------"""
+def add_datvels(current_string, new_string):
+    new_datvel = current_string
+    temp = new_string.strip("|").split("|")
+    # There should at least be one speed registration point
+    if len(temp)> 1: 
+        for p in range(0,len(temp),2):
+            candidate_datvel = temp[p] +"|"+ temp[p+1]
+            if not (candidate_datvel in new_datvel): new_datvel += "|" + candidate_datvel
+    return new_datvel
+
 #TODO DONE
 def ensure_point_in_network(G_proj, projectedPoint, edge, be, name, settings, two_way, temp_last_point = None, start_point = None, do_print = False):
     """
@@ -75,7 +85,8 @@ def ensure_point_in_network(G_proj, projectedPoint, edge, be, name, settings, tw
                 edge_points_list = sorted(set(edge_points_list), key = edge_points_list.index)
                 if len(edge_points_list) <= 1: new_geom = LineString([projectedPoint_Edge] + [projectedPoint_Edge]) 
                 else: new_geom = LineString(edge_points_list[:-1] + [projectedPoint_Edge]) 
-                G_proj.edges[e[0], e[1], e[2]]['geometry'] = new_geom 
+                G_proj.edges[e[0], e[1], e[2]]['geometry'] = new_geom
+                G_proj.edges[e[0], e[1], e[2]]['length'] = computeLengthLinestring(new_geom, method = 'euclidean')
             for e in outgoing_edges:
                 # Adjust geometry
                 geom = e[3]['geometry']
@@ -84,6 +95,7 @@ def ensure_point_in_network(G_proj, projectedPoint, edge, be, name, settings, tw
                 if len(edge_points_list) <= 1: new_geom = LineString([projectedPoint_Edge] + [projectedPoint_Edge]) 
                 else: new_geom = LineString([projectedPoint_Edge] + edge_points_list[1:]) 
                 G_proj.edges[e[0], e[1], e[2]]['geometry'] = new_geom
+                G_proj.edges[e[0], e[1], e[2]]['length'] = computeLengthLinestring(new_geom, method = 'euclidean')
             
             # Adjust the node 
             new_point = Point(projectedPoint_Edge)
@@ -213,6 +225,7 @@ def include_point_in_newedge(G, edge, be, point, old_point, points_to_be_adjuste
                 edge_newgeom = LineString(edge_points_list[0:(be+1)] +  [(point[1], point[0])] + edge_points_list[(be+1):])
                 # Adjust the geometry of the new edge (include point on the right spot)
                 G.edges[edge[0], edge[1], edge[2]]['geometry'] = edge_newgeom
+                G.edges[edge[0], edge[1], edge[2]]['length'] = computeLengthLinestring(edge_newgeom, method = 'euclidean')
                 edge = (edge[0], edge[1], edge[2], edge_newgeom)
                 return edge, points_adjusted, None, temp_new
         
@@ -221,6 +234,7 @@ def include_point_in_newedge(G, edge, be, point, old_point, points_to_be_adjuste
         # Remove the old edge, but keep its osmid and oneway
         id_keep = G.edges[edge[0], edge[1], edge[2]]['osmid']
         oneway_keep = G.edges[edge[0], edge[1], edge[2]]['oneway']
+        datvel_keep = G.edges[edge[0], edge[1], edge[2]]['DatesVelocities']
         G.remove_edge(edge[0], edge[1], key = edge[2])
 
         # Update the ctps for next rounds. 
@@ -261,7 +275,7 @@ def include_point_in_newedge(G, edge, be, point, old_point, points_to_be_adjuste
         # Add the new edge (note that it is a new edge, so highway is in any case not defined (we use driven))
         keyNew = max([item[2] for item in G.edges(currentPoint, edge[1], keys = True) if ((item[0] == currentPoint) & (item[1] == edge[1]))], default=-1) + 1
         constructing_edge_newgeom = LineString([(G.nodes[currentPoint]['x'], G.nodes[currentPoint]['y'])] + [(point[1], point[0])] + edge_points_list[1:])
-        G.add_edge(currentPoint, edge[1], osmid = id_keep, new = True, driven = True, ref = None, highway=None, oneway= oneway_keep, length = computeLengthLinestring(constructing_edge_newgeom, method = 'euclidean'), geometry = constructing_edge_newgeom, close_to_point_start = ctps, close_to_point_end = ctpe, maxspeed = None, service = None, bridge= None, lanes = None, u = currentPoint, v = edge[1], key = keyNew)
+        G.add_edge(currentPoint, edge[1], osmid = id_keep, new = True, driven = True, DatesVelocities = datvel_keep, ref = None, highway=None, oneway= oneway_keep, length = computeLengthLinestring(constructing_edge_newgeom, method = 'euclidean'), geometry = constructing_edge_newgeom, close_to_point_start = ctps, close_to_point_end = ctpe, maxspeed = None, service = None, bridge= None, lanes = None, u = currentPoint, v = edge[1], key = keyNew)
  
         # Also remove the corresponding old connection point when: 
         # - the new projection point is not merged with the old projection point AND
@@ -302,6 +316,7 @@ def include_point_in_newedge(G, edge, be, point, old_point, points_to_be_adjuste
             edge_newgeom = LineString(edge_points_list[0:(be+1)] +  [(point[1], point[0])] + edge_points_list[(be+1):])
             # Adjust the geometry of the new edge (include point on the right spot)
             G.edges[edge[0], edge[1], edge[2]]['geometry'] = edge_newgeom  
+            G.edges[edge[0], edge[1], edge[2]]['length'] = computeLengthLinestring(edge_newgeom, method = 'euclidean')
             edge = (edge[0], edge[1], edge[2], edge_newgeom)
             return edge, points_to_be_adjusted, None, temp_new
         
@@ -310,6 +325,7 @@ def include_point_in_newedge(G, edge, be, point, old_point, points_to_be_adjuste
         # Remove the old edge, but keep its osmid/oneway
         id_keep = G.edges[edge[0], edge[1], edge[2]]['osmid']
         oneway_keep = G.edges[edge[0], edge[1], edge[2]]['oneway']
+        datvel_keep = G.edges[edge[0], edge[1], edge[2]]['DatesVelocities']
         G.remove_edge(edge[0], edge[1], key = edge[2])
 
         # Update the ctpe for next rounds. Since we add another point on the last line piece, we change the lower bound of MLDC to the close_to point to zero (because we are getting closer to the close_to_point...)
@@ -345,7 +361,7 @@ def include_point_in_newedge(G, edge, be, point, old_point, points_to_be_adjuste
         # Add the new edge (note that it is a new edge, so highway is in any case not defined (we use driven))
         keyNew = max([item[2] for item in G.edges(edge[0], currentPoint, keys = True) if ((item[0] == edge[0]) & (item[1] == currentPoint))], default=-1) + 1
         constructing_edge_newgeom = LineString(edge_points_list[:-1] +  [(point[1], point[0])] + [(G.nodes[currentPoint]['x'], G.nodes[currentPoint]['y'])])
-        G.add_edge(edge[0], currentPoint, osmid = id_keep, new = True, driven = True, ref = None, highway=None, oneway= oneway_keep, length = computeLengthLinestring(constructing_edge_newgeom, method = 'euclidean'), geometry = constructing_edge_newgeom, close_to_point_start = ctps, close_to_point_end = ctpe, maxspeed = None, service = None, bridge= None, lanes = None, u = edge[0], v = currentPoint, key = keyNew)
+        G.add_edge(edge[0], currentPoint, osmid = id_keep, new = True, driven = True, DatesVelocities = datvel_keep, ref = None, highway=None, oneway= oneway_keep, length = computeLengthLinestring(constructing_edge_newgeom, method = 'euclidean'), geometry = constructing_edge_newgeom, close_to_point_start = ctps, close_to_point_end = ctpe, maxspeed = None, service = None, bridge= None, lanes = None, u = edge[0], v = currentPoint, key = keyNew)
         
         # Remove the corresponding old connection point when: 
         # - the end node of the edge is not equal to the old connection point AND 
@@ -373,6 +389,7 @@ def include_point_in_newedge(G, edge, be, point, old_point, points_to_be_adjuste
         edge_newgeom = LineString(edge_points_list[0:(be+1)] +  [(point[1], point[0])] + edge_points_list[(be+1):])
         # Adjust the geometry of the new edge (include point on the right spot)
         G.edges[edge[0], edge[1], edge[2]]['geometry'] = edge_newgeom
+        G.edges[edge[0], edge[1], edge[2]]['length'] = computeLengthLinestring(edge_newgeom, method = 'euclidean')
         edge = (edge[0], edge[1], edge[2], edge_newgeom)
         points_adjusted = points_to_be_adjusted
 
@@ -426,6 +443,7 @@ def add_point_expl(G, point, edge, be, node_name, settings, merge = False, two_w
     new = G[edge[0]][edge[1]][edge[2]]['new']
     oneway = G[edge[0]][edge[1]][edge[2]]['oneway']
     highway = G[edge[0]][edge[1]][edge[2]]['highway']
+    datvel = G[edge[0]][edge[1]][edge[2]]['DatesVelocities']
     
     # If two_way is true, we add the node inbetween at least two opposite edges. Note that we do not change the geometries of the second_way edge as this will have a minimal effect. If the lines do not align exactly, this may cause a small (negligible) error in the length of the geometry.  
     if two_way: 
@@ -453,8 +471,8 @@ def add_point_expl(G, point, edge, be, node_name, settings, merge = False, two_w
     keyNew_2 = max([item[2] for item in G.edges(node_name, edge[1], keys = True) if ((item[0] == node_name) & (item[1] == edge[1]))], default=-1) + 1
     
     # Create the two edges and remove the old non-splitted edge (note that both are now driven.)
-    G.add_edge(edge[0], node_name, osmid = 'Edge_split_2: ' + str(edge[0]) + "_" + str(node_name), new = new, driven = True, ref = None, highway=highway, oneway= oneway, length = computeLengthLinestring(geom_1, method= "euclidean"), geometry = geom_1, close_to_point_start = ctps, close_to_point_end = 'End', maxspeed = None, service = None, bridge= None, lanes = None, u = edge[0], v = node_name, key = keyNew_1)
-    G.add_edge(node_name, edge[1], osmid = 'Edge_split_2: ' + str(node_name) + "_" + str(edge[1]), new = new, driven = True, ref = None, highway=highway, oneway= oneway, length = computeLengthLinestring(geom_2, method= "euclidean"), geometry = geom_2, close_to_point_start = 'Start', close_to_point_end = ctpe, maxspeed = None, service = None, bridge= None, lanes = None, u = node_name, v = edge[1], key = keyNew_2)
+    G.add_edge(edge[0], node_name, osmid = 'Edge_split_2: ' + str(edge[0]) + "_" + str(node_name), new = new, driven = True, DatesVelocities = datvel, ref = None, highway=highway, oneway= oneway, length = computeLengthLinestring(geom_1, method= "euclidean"), geometry = geom_1, close_to_point_start = ctps, close_to_point_end = 'End', maxspeed = None, service = None, bridge= None, lanes = None, u = edge[0], v = node_name, key = keyNew_1)
+    G.add_edge(node_name, edge[1], osmid = 'Edge_split_2: ' + str(node_name) + "_" + str(edge[1]), new = new, driven = True, DatesVelocities = datvel, ref = None, highway=highway, oneway= oneway, length = computeLengthLinestring(geom_2, method= "euclidean"), geometry = geom_2, close_to_point_start = 'Start', close_to_point_end = ctpe, maxspeed = None, service = None, bridge= None, lanes = None, u = node_name, v = edge[1], key = keyNew_2)
     G.remove_edge(edge[0], edge[1], edge[2])
 
     return node_name, [(edge[0], node_name, keyNew_1, geom_1), (node_name, edge[1], keyNew_2, geom_2)]
@@ -524,6 +542,24 @@ def remove_point(G, old_point, do_print = False):
             print("Very strange, a splitted edge should have on both sides the same value for highway..") 
             stop
         
+        #TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO
+        #TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO
+        #TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO
+        #print(start_edge[3]['DatesVelocities'])
+        #print(end_edge[3]['DatesVelocities'])
+        new_datvel = start_edge[3]['DatesVelocities']
+        
+        datvel = add_datvels(current_string = new_datvel, new_string = end_edge[3]['DatesVelocities'])
+        # temp = end_edge[3]['DatesVelocities'].strip("|").split("|")
+        # # There should at least be one speed registration point
+        # if len(temp)> 1:
+        #     for p in range(0,len(temp),2):
+        #         candidate_datvel = temp[p] +"|"+ temp[p+1]
+        #         if not (candidate_datvel in new_datvel): new_datvel += "|" + candidate_datvel
+        # datvel = new_datvel
+        #TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO
+        #TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO
+        #TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO
         # Determine full edge geometry. The location of old_point is preserved, but without an explicit node. 
         geom_1 = start_edge[3]['geometry']
         geom_2 = end_edge[3]['geometry']
@@ -539,7 +575,7 @@ def remove_point(G, old_point, do_print = False):
 
         # Restore splitted edge
         keyNew = max([item[2] for item in G.edges(start_edge[0], end_edge[1], keys = True) if ((item[0] == start_edge[0]) & (item[1] == end_edge[1]))], default=-1) + 1
-        G.add_edge(start_edge[0], end_edge[1], osmid = 'Edge_resplit: '+ str(start_edge[0]) + "_" + str(end_edge[1]), new = new, driven = driven, ref = None, highway=highway, oneway= oneway, length = computeLengthLinestring(edge_newgeom, method = 'euclidean'), geometry = edge_newgeom, close_to_point_start = ctps_1, close_to_point_end = ctpe_2, maxspeed = None, service = None, bridge= None, lanes = None, u = start_edge[0], v = end_edge[1], key = keyNew)
+        G.add_edge(start_edge[0], end_edge[1], osmid = 'Edge_resplit: '+ str(start_edge[0]) + "_" + str(end_edge[1]), new = new, driven = driven, DatesVelocities = datvel, ref = None, highway=highway, oneway= oneway, length = computeLengthLinestring(edge_newgeom, method = 'euclidean'), geometry = edge_newgeom, close_to_point_start = ctps_1, close_to_point_end = ctpe_2, maxspeed = None, service = None, bridge= None, lanes = None, u = start_edge[0], v = end_edge[1], key = keyNew)
         if do_print: print("Edge {0} is added.".format((start_edge[0], end_edge[1], keyNew)))
         return [(start_edge[0], end_edge[1], keyNew, edge_newgeom)]
        
@@ -582,6 +618,24 @@ def remove_point(G, old_point, do_print = False):
                     print("Very strange, a splitted edge should have on both sides the same value for highway..")
                     stop
                 
+                #TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO
+                #TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO
+                #TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO
+                #print(start_edge[3]['DatesVelocities'])
+                #print(end_edge[3]['DatesVelocities'])
+                new_datvel = start_edge[3]['DatesVelocities'] 
+                datvel = add_datvels(current_string = new_datvel, new_string = end_edge[3]['DatesVelocities'])
+                # temp = end_edge[3]['DatesVelocities'].strip("|").split("|")
+#                 # There should at least be one speed registration point
+#                 if len(temp)> 1:
+#                     for p in range(0,len(temp),2):
+#                         candidate_datvel = temp[p] +"|"+ temp[p+1]
+#                         if not (candidate_datvel in new_datvel): new_datvel += "|" + candidate_datvel
+#                 datvel = new_datvel
+                #TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO
+                #TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO
+                #TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO
+                
                 # Determine geometry of this edge. The location of old_point is preserved, but without an explicit node. 
                 geom_1 = start_edge[3]['geometry']     
                 geom_2 = end_edge[3]['geometry']
@@ -597,7 +651,7 @@ def remove_point(G, old_point, do_print = False):
                 
                 # Restore splitted edge
                 keyNew = max([item[2] for item in G.edges(start_edge[0], end_edge[1], keys = True) if ((item[0] == start_edge[0]) & (item[1] == end_edge[1]))], default=-1) + 1
-                G.add_edge(start_edge[0], end_edge[1], osmid = 'Edge_resplit: '+ str(start_edge[0]) + "_" + str(end_edge[1]), new = new, driven = driven, ref = None, highway=highway, oneway= oneway, length = computeLengthLinestring(edge_newgeom, method = 'euclidean'), geometry = edge_newgeom, close_to_point_start = ctps_1, close_to_point_end = ctpe_2, maxspeed = None, service = None, bridge= None, lanes = None, u = start_edge[0], v = end_edge[1], key = keyNew)
+                G.add_edge(start_edge[0], end_edge[1], osmid = 'Edge_resplit: '+ str(start_edge[0]) + "_" + str(end_edge[1]), new = new, driven = driven, DatesVelocities = datvel, ref = None, highway=highway, oneway= oneway, length = computeLengthLinestring(edge_newgeom, method = 'euclidean'), geometry = edge_newgeom, close_to_point_start = ctps_1, close_to_point_end = ctpe_2, maxspeed = None, service = None, bridge= None, lanes = None, u = start_edge[0], v = end_edge[1], key = keyNew)
                 if do_print: print("Edge {0} is added.".format((start_edge[0], end_edge[1], keyNew)))         
     
                 # Add the restored edges to the list of return edges.
@@ -707,7 +761,8 @@ def findProjectionPoint(G, point, close_to_edge, connecting, forward, temp_point
     """
     # Extract settings
     max_dist_projection, max_bearingdiff_projection, max_dist_merge, _, indmax, _ = ExtractSettings(settings)
-    
+    try: curdatvel = point[3]
+    except: curdatvel = "NN"
     # Initialize parameters (used everywhere)
     p = Point(reversed(point[0:2]))
     point = (p, point[2])
@@ -790,6 +845,10 @@ def findProjectionPoint(G, point, close_to_edge, connecting, forward, temp_point
                 drivenEdge = df.EdgesDriven[0][0]
                 if drivenEdge[0] != drivenEdge[1]:
                     G.edges[drivenEdge[0], drivenEdge[1], drivenEdge[2]]['driven'] = True
+                    # Speed registration for the projection edge
+                    #if curdatvel != "NN": G.edges[drivenEdge[0], drivenEdge[1], drivenEdge[2]]['DatesVelocities'] += "|" + curdatvel
+                    if curdatvel != "NN": G.edges[drivenEdge[0], drivenEdge[1], drivenEdge[2]]['DatesVelocities'] = add_datvels(G.edges[drivenEdge[0], drivenEdge[1], drivenEdge[2]]['DatesVelocities'], curdatvel)
+                    
                 return (df.ProjectedPoint[0], df.ClosestDistance[0], edge_new , df.BestEdge[0])
             else: return (None, None, None, None) # Point cannot be projected
         
@@ -811,6 +870,10 @@ def findProjectionPoint(G, point, close_to_edge, connecting, forward, temp_point
                 for drivenEdge in df.EdgesDriven[0]: 
                     if drivenEdge[0] != drivenEdge[1]:
                         G.edges[drivenEdge[0], drivenEdge[1], drivenEdge[2]]['driven'] = True
+                        
+                # Only speed registration for the last driven edge (current projection)
+                #if curdatvel != "NN": G.edges[edge_new[0], edge_new[1], edge_new[2]]['DatesVelocities'] += "|" + curdatvel
+                if curdatvel != "NN": G.edges[edge_new[0], edge_new[1], edge_new[2]]['DatesVelocities'] = add_datvels(G.edges[edge_new[0], edge_new[1], edge_new[2]]['DatesVelocities'], curdatvel)
                 return (df.ProjectedPoint[0], df.ClosestDistance[0], edge_new , df.BestEdge[0])   
             else: return (None, None, None, None) # Point cannot be projected (no point within distance)
     
@@ -1080,7 +1143,7 @@ def get_SP_distance(G, from_point, to_point):
         driven_paths += [to_point[1][0:3] + tuple([a_to])]
         orig_node = merge_from
         target_node = to_point[1][0]
-    # If both points were merged with nodes in the graph. 
+    # If both points were merged with nodes in the graph.
     elif (merge_from is not None) & (merge_to is not None):
         orig_node = merge_from
         target_node = merge_to

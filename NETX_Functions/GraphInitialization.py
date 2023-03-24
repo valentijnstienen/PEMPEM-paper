@@ -1,3 +1,12 @@
+# Date       : 11-01-2021
+# Environment: conda activate ox
+# Location   : cd "Desktop/NETX/NETX_Functions"
+# Run        : python GraphInitialization.py
+# Package info: /Users/valentijnstienen/anaconda3/envs/ox/lib/python3.8/site-packages
+
+# Load settings
+#exec(open("../SETTINGS.py").read())
+
 import osmnx as ox
 
 import geopandas as gp
@@ -299,6 +308,7 @@ else: # Initial graph is not a shapefile
     nx.set_edge_attributes(initial_G, "-", name = 'close_to_point_end')
     nx.set_edge_attributes(initial_G, False, name = 'new')
     nx.set_edge_attributes(initial_G, False, name = 'driven')
+    nx.set_edge_attributes(initial_G, "", name = 'DatesVelocities')
     nx.set_edge_attributes(initial_G, None, name = 'length_OLD')
      
     # Project the graph to the crs in which the centroid of the initial graph lies

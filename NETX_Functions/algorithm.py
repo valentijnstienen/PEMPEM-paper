@@ -4,7 +4,7 @@ import osmnx as ox
 import networkx as nx
 from shapely.geometry import Point, LineString, MultiPoint
 
-from NETX_Functions.GraphOperations import mergeNode, findProjectionPoint, add_point_expl, include_point_in_newedge, projectPointOnEdge, get_SP_distance, remove_point, get_nearest_edge_FULL, get_max_distance_bound, closeToCorner, checkIfNoCornerPointsFromStart, ensure_point_in_network
+from NETX_Functions.GraphOperations import mergeNode, findProjectionPoint, add_point_expl, include_point_in_newedge, projectPointOnEdge, get_SP_distance, remove_point, get_nearest_edge_FULL, get_max_distance_bound, closeToCorner, checkIfNoCornerPointsFromStart, ensure_point_in_network, add_datvels
 from NETX_Functions.MathOperations import computeLengthLinestring
 
 def ExtendGraph(initial_G, points, settings, MAX_STEP_INPUT = None, do_print = False):
@@ -98,6 +98,9 @@ def ExtendGraph_trajectory(G_proj, tripdf, step, settings, do_print = False):
         if do_print: print("----- Currently examining point " + str(p) + " ------")
         y_point = tripdf.geometry[p].y
         x_point = tripdf.geometry[p].x
+        curDateVel = str(tripdf.DateTime[p]) + "|" + str(tripdf.Speed[p])
+        
+        
         
         # Determine the maximum (actual) distance from the last GPS point (note that the previous point could have been merged, there subtract/add this distance (widen the interval))
         max_actual_dist = [tripdf.MaxDistance_TIME[p]+settings[2], (tripdf.MinDistance_LOC[p]-settings[2], tripdf.MaxDistance_VELTIME[p]+settings[2])]
@@ -108,7 +111,7 @@ def ExtendGraph_trajectory(G_proj, tripdf, step, settings, do_print = False):
             if do_print: print("||||| Try to project the point.")
             if do_print: print("Close to the point: {0}, which is projected onto edge (forward): {1}".format(None, None))
             # Find the nearest edge (with the right direction). Note that if the point will not be merged, the direction does not make sense.
-            projectedPoint, closestDistance, edge, be_edgenew = findProjectionPoint(G_proj, (y_point,x_point,tripdf.Course[p]), close_to_edge = None, connecting = False, forward = None, temp_point = None, settings = settings, max_actual_dist = None, crs= crs)
+            projectedPoint, closestDistance, edge, be_edgenew = findProjectionPoint(G_proj, (y_point,x_point,tripdf.Course[p],curDateVel), close_to_edge = None, connecting = False, forward = None, temp_point = None, settings = settings, max_actual_dist = None, crs= crs)
             if do_print: print("Projected point: {0}".format(projectedPoint))
             if do_print: print("Closest distance: " + str(closestDistance) + " meters.")
             if do_print: print("Projected onto edge: {0}".format(edge))
@@ -222,7 +225,8 @@ def ExtendGraph_trajectory(G_proj, tripdf, step, settings, do_print = False):
                 G_proj.add_node(newNode, y = y_point, x = x_point, osmid = newNode, geometry = Point(x_point, y_point))
                 # Start a new edge that connects this point to the current network
                 if do_print: print("Start a new edge!")
-                currentLine = currentLine + [(x_point, y_point)]       
+                currentLine = currentLine + [(x_point, y_point)]
+                curDateVels = "|"+curDateVel      
                 # Update parameters
                 temp_last_point = newNode # Starting node of the newly created edge
                 first_point_of_edge = False # The next point is not the first point of an edge
@@ -246,7 +250,7 @@ def ExtendGraph_trajectory(G_proj, tripdf, step, settings, do_print = False):
                 print("YOU FOOL!! Edge: {0} does not exist (anymore)!".format(edge_old))
                 stop
         # Find the nearest edge (with the right direction). Note that if the point will not be merged, the direction does not make sense. 
-        projectedPoint, closestDistance, edge, be_edgenew = findProjectionPoint(G_proj, (y_point,x_point,tripdf.Course[p]), close_to_edge = edge_old, connecting = False, forward = True, temp_point = projectedPoint_OLD, settings = settings, max_actual_dist = max_actual_dist, crs= crs)
+        projectedPoint, closestDistance, edge, be_edgenew = findProjectionPoint(G_proj, (y_point,x_point,tripdf.Course[p],curDateVel), close_to_edge = edge_old, connecting = False, forward = True, temp_point = projectedPoint_OLD, settings = settings, max_actual_dist = max_actual_dist, crs= crs)
         if do_print: print("Projected point: {0}".format(projectedPoint))
         if do_print: print("Closest distance: " + str(closestDistance) + " meters.")
         if do_print: print("Projected onto edge: {0}".format(edge))
@@ -267,7 +271,7 @@ def ExtendGraph_trajectory(G_proj, tripdf, step, settings, do_print = False):
                 if do_print: print("||||| Try to project the point after turning at the previous point.")
                 if do_print: print("Close to the point: {0}, which is projected onto edge (forward): {1}".format(projectedPoint_OLD, closestEdge))
                 # Find the nearest edge (with the right direction). Note that if the point will not be merged, the direction does not make sense. 
-                projectedPoint_2, closestDistance_2, edge_2, be_2 = findProjectionPoint(G_proj, (y_point,x_point,tripdf.Course[p]), close_to_edge = closestEdge, connecting = False, forward = True, temp_point = projectedPoint_OLD_opposite, settings = settings, max_actual_dist = max_actual_dist, crs= crs)
+                projectedPoint_2, closestDistance_2, edge_2, be_2 = findProjectionPoint(G_proj, (y_point,x_point,tripdf.Course[p],curDateVel), close_to_edge = closestEdge, connecting = False, forward = True, temp_point = projectedPoint_OLD_opposite, settings = settings, max_actual_dist = max_actual_dist, crs= crs)
                 if do_print: print("Projected point: {0}".format(projectedPoint_2))
                 if do_print: print("Closest distance: " + str(closestDistance_2) + " meters.")
                 if do_print: print("Projected onto edge: {0}".format(edge_2))
@@ -686,11 +690,11 @@ def ExtendGraph_trajectory(G_proj, tripdf, step, settings, do_print = False):
                         """ ___________________________ ADD NEW EDGE TO THE NETWORK _________________________"""
                         if do_print: print("Add the edge between " + str(temp_last_point) + " and " + str(newNode) + ".")
                         keyNew = max([item[2] for item in G_proj.edges(temp_last_point, newNode, keys = True) if ((item[0] == temp_last_point) & (item[1] == newNode))], default=-1) + 1
-                        G_proj.add_edge(temp_last_point, newNode, osmid = 'Edge: ' + str(trip) + "_" + str(p), new = True, driven = True, ref = None, highway = None, oneway = not settings[3], length = computeLengthLinestring(LineString(currentLine), method = 'euclidean'), geometry = LineString(currentLine), close_to_point_start = close_to_point_start, close_to_point_end = [(projectedPoint_OLD[1],projectedPoint_OLD[0],tripdf.Course[p]), max_actual_dist], maxspeed = None, service = None, bridge= None, lanes = None, u = temp_last_point, v = newNode, key = keyNew)
+                        G_proj.add_edge(temp_last_point, newNode, osmid = 'Edge: ' + str(trip) + "_" + str(p), new = True, driven = True, DatesVelocities = curDateVels, ref = None, highway = None, oneway = not settings[3], length = computeLengthLinestring(LineString(currentLine), method = 'euclidean'), geometry = LineString(currentLine), close_to_point_start = close_to_point_start, close_to_point_end = [(projectedPoint_OLD[1],projectedPoint_OLD[0],tripdf.Course[p]), max_actual_dist], maxspeed = None, service = None, bridge= None, lanes = None, u = temp_last_point, v = newNode, key = keyNew)
                         # Add the opposite new edge (if two_way considered). Also, check if there is already another edge between the two nodes (to use the right key)
                         if settings[3]:
                             keyNew = max([item[2] for item in G_proj.edges(newNode, temp_last_point, keys = True) if ((item[0] == newNode) & (item[1] == temp_last_point))], default=-1) + 1
-                            G_proj.add_edge(newNode, temp_last_point, osmid = 'Edge: ' + str(trip) + "_" + str(p) + "_r", new = True, driven = True, ref = None, highway = None, oneway = not settings[3], length = computeLengthLinestring(LineString(currentLine[::-1]), method = 'euclidean'), geometry = LineString(currentLine[::-1]), close_to_point_start = [(projectedPoint_OLD[1],projectedPoint_OLD[0],tripdf.Course[p]), max_actual_dist], close_to_point_end = close_to_point_start, maxspeed = None, service = None, bridge= None, lanes = None, u = newNode, v = temp_last_point, key = keyNew)
+                            G_proj.add_edge(newNode, temp_last_point, osmid = 'Edge: ' + str(trip) + "_" + str(p) + "_r", new = True, driven = True, DatesVelocities = curDateVels, ref = None, highway = None, oneway = not settings[3], length = computeLengthLinestring(LineString(currentLine[::-1]), method = 'euclidean'), geometry = LineString(currentLine[::-1]), close_to_point_start = [(projectedPoint_OLD[1],projectedPoint_OLD[0],tripdf.Course[p]), max_actual_dist], close_to_point_end = close_to_point_start, maxspeed = None, service = None, bridge= None, lanes = None, u = newNode, v = temp_last_point, key = keyNew)
                         """ _________________________________________________________________________________"""
                         
                         """ ___________________________________ UPDATE edge_old / projectedPoint_OLD _________________________________"""
@@ -748,6 +752,7 @@ def ExtendGraph_trajectory(G_proj, tripdf, step, settings, do_print = False):
            
                 # Start a new edge that connects this point to the current network, add first piece of the edge
                 currentLine = [(G_proj.nodes[currentPoint]['x'], G_proj.nodes[currentPoint]['y'])]
+                curDateVels = "|"+curDateVel
                 
                 # Update parameters for the new edge (to be created). Note that the starting connection point of this new edge is based on projectedPoint_OLD and its corresponding course. Moreover, we can use the distance covered from this previous point to the new point in future iterations. 
                 temp_last_point = currentPoint
@@ -932,17 +937,19 @@ def ExtendGraph_trajectory(G_proj, tripdf, step, settings, do_print = False):
                     """ ___________________________ ADD NEW EDGE TO THE NETWORK _________________________"""
                     if do_print: print("Add the edge between " + str(temp_last_point) + " and " + str(last_point) + ".")
                     keyNew = max([item[2] for item in G_proj.edges(temp_last_point, last_point, keys = True) if ((item[0] == temp_last_point) & (item[1] == last_point))], default=-1) + 1
-                    G_proj.add_edge(temp_last_point, last_point, osmid = 'Edge: ' + str(trip) + "_" + str(p), new = True, driven = True, ref = None, highway=None, oneway= not settings[3], length = computeLengthLinestring(LineString(currentLine), method= "euclidean"), geometry = LineString(currentLine), close_to_point_start = close_to_point_start, close_to_point_end = 'End', maxspeed = None, service = None, bridge= None, lanes = None, u = temp_last_point, v = last_point, key = keyNew)
+                    G_proj.add_edge(temp_last_point, last_point, osmid = 'Edge: ' + str(trip) + "_" + str(p), new = True, driven = True, DatesVelocities = "|"+curDateVel, ref = None, highway=None, oneway= not settings[3], length = computeLengthLinestring(LineString(currentLine), method= "euclidean"), geometry = LineString(currentLine), close_to_point_start = close_to_point_start, close_to_point_end = 'End', maxspeed = None, service = None, bridge= None, lanes = None, u = temp_last_point, v = last_point, key = keyNew)
                     # Add the opposite new edge (if two_way considered). Also, check if there is already another edge between the two nodes (to use the right key)
                     if settings[3]:
                         keyNew = max([item[2] for item in G_proj.edges(last_point, temp_last_point, keys = True) if ((item[0] == last_point) & (item[1] == temp_last_point))], default=-1) + 1
-                        G_proj.add_edge(last_point, temp_last_point, osmid = 'Edge: ' + str(trip) + "_" + str(p) + "_r", new = True, driven = True, ref = None, highway = None, oneway= not settings[3], length = computeLengthLinestring(LineString(currentLine[::-1]), method = 'euclidean'), geometry = LineString(currentLine[::-1]), close_to_point_start = 'End', close_to_point_end = close_to_point_start, maxspeed = None, service = None, bridge= None, lanes = None, u = last_point, v = temp_last_point, key = keyNew)
+                        G_proj.add_edge(last_point, temp_last_point, osmid = 'Edge: ' + str(trip) + "_" + str(p) + "_r", new = True, driven = True, DatesVelocities = "|"+curDateVel, ref = None, highway = None, oneway= not settings[3], length = computeLengthLinestring(LineString(currentLine[::-1]), method = 'euclidean'), geometry = LineString(currentLine[::-1]), close_to_point_start = 'End', close_to_point_end = close_to_point_start, maxspeed = None, service = None, bridge= None, lanes = None, u = last_point, v = temp_last_point, key = keyNew)
                     """ _________________________________________________________________________________"""
             else:
                 # Extend the geometry of the currently forming edge. Note that in the case that we are creating a new edge, we do include ALL point in its geometry. The idea is to start with the best approximation possible, and then be more strict when adding points to the geometry.   
                 currentLine = currentLine + [(x_point, y_point)]
                 if do_print: print("||||| Node incorporated into the current edge.") 
-            
+                
+                curDateVels = add_datvels(curDateVels, curDateVel)
+                #curDateVels += "|"+curDateVel
                 # Update parameters
                 started_new_edge = False # If we just added a new corner point, it means that the current point could not have been absorbed.  
                 
