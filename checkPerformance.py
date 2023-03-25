@@ -45,16 +45,18 @@ def determine_possible_fromto_points(edges, point, MAX_PROJECTION, MAX_DISTANCE_
     return possible_points 
 def determine_best_shortest_path(G, possible_from_points, possible_to_points):
     SP_length, SP_edges = float('inf'), []
+    from_point_projected, to_point_projected = None, None
     ind_from = 0
     for fp in possible_from_points:
         ind_to = 0
         for tp in possible_to_points:
-            a, b = get_SP_distance(G, fp, tp)[0:2]
+            a, b, from_point_projected_temp, to_point_projected_temp = get_SP_distance(G, fp, tp)
             if a < SP_length:
                 SP_length, SP_edges = a, b
+                from_point_projected, to_point_projected = from_point_projected_temp, to_point_projected_temp
             ind_to += 1
         ind_from += 1
-    return SP_length, SP_edges
+    return SP_length, SP_edges, from_point_projected, to_point_projected
 def plot_path(G, origin_point, destination_point, paths, fromto_points, mapbox_accesstoken):
     # Create figure
     fig = go.Figure()
@@ -158,7 +160,7 @@ def determine_greatness(G_original, G_extended, IDs, MAX_PROJECTION, MAX_DISTANC
     #_____________________________________________________________________#
 
     # Loop through all from and to points
-    df = pd.DataFrame(columns = ['From', 'To', "SP_OLD", "SP_NEW"])
+    df = pd.DataFrame(columns = ['From', 'To', 'From_P_OLD', 'To_P_OLD', "SP_OLD", 'From_P_NEW', 'To_P_NEW', "SP_NEW"])
     idn = 0
 
     for from_point, to_point in zip(from_points_relevant, to_points_relevant):
@@ -171,7 +173,7 @@ def determine_greatness(G_original, G_extended, IDs, MAX_PROJECTION, MAX_DISTANC
         possible_from_points = determine_possible_fromto_points(edges = EDGES_ORIGINAL, point= from_point, MAX_PROJECTION=MAX_PROJECTION, MAX_DISTANCE_OPPOSITE_EDGE=MAX_DISTANCE_OPPOSITE_EDGE)
         possible_to_points = determine_possible_fromto_points(edges = EDGES_ORIGINAL, point= to_point, MAX_PROJECTION=MAX_PROJECTION, MAX_DISTANCE_OPPOSITE_EDGE=MAX_DISTANCE_OPPOSITE_EDGE)
         #Find the best shortest path
-        SP_length_OLD, SP_edges_OLD = determine_best_shortest_path(G_original, possible_from_points=possible_from_points, possible_to_points=possible_to_points)
+        SP_length_OLD, SP_edges_OLD, from_p_OLD, to_p_OLD = determine_best_shortest_path(G_original, possible_from_points=possible_from_points, possible_to_points=possible_to_points)
         if False: print("SP length in the original graph: " + str(SP_length_OLD))
         if False: plot_path(G_original_projected, from_point, to_point, SP_edges_OLD, fromto_points, mapbox_accesstoken)
         
@@ -179,14 +181,14 @@ def determine_greatness(G_original, G_extended, IDs, MAX_PROJECTION, MAX_DISTANC
         possible_from_points = determine_possible_fromto_points(edges = EDGES_EXTENDED, point= from_point, MAX_PROJECTION=MAX_PROJECTION, MAX_DISTANCE_OPPOSITE_EDGE=MAX_DISTANCE_OPPOSITE_EDGE)
         possible_to_points = determine_possible_fromto_points(edges = EDGES_EXTENDED, point= to_point, MAX_PROJECTION=MAX_PROJECTION, MAX_DISTANCE_OPPOSITE_EDGE=MAX_DISTANCE_OPPOSITE_EDGE)
         # Find the best shortest path
-        SP_length_NEW, SP_edges_NEW = determine_best_shortest_path(G_extended, possible_from_points=possible_from_points, possible_to_points=possible_to_points)
+        SP_length_NEW, SP_edges_NEW, from_p_NEW, to_p_NEW = determine_best_shortest_path(G_extended, possible_from_points=possible_from_points, possible_to_points=possible_to_points)
         if False: print("SP length in the graph: " + str(SP_length_NEW))
         if False: plot_path(G_extended_projected, from_point, to_point, SP_edges_NEW, fromto_points, mapbox_accesstoken)
         """----------------------------------------------------------------------------------"""
         """----------------------------------------------------------------------------------"""
         idn+=1
         # Add to the dataframe
-        df.loc[len(df)] = [from_point, to_point, SP_length_OLD, SP_length_NEW]
+        df.loc[len(df)] = [from_point, to_point, from_p_OLD, to_p_OLD, SP_length_OLD, from_p_NEW, to_p_NEW, SP_length_NEW]
     
     # Add the length of the corresponding trajectory to this dataset
     df['Trajectory_length'] = trajectory_lengths_relevant
