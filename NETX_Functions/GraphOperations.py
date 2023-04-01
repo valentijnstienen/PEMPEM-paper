@@ -542,24 +542,9 @@ def remove_point(G, old_point, do_print = False):
             print("Very strange, a splitted edge should have on both sides the same value for highway..") 
             stop
         
-        #TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO
-        #TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO
-        #TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO
-        #print(start_edge[3]['DatesVelocities'])
-        #print(end_edge[3]['DatesVelocities'])
         new_datvel = start_edge[3]['DatesVelocities']
-        
         datvel = add_datvels(current_string = new_datvel, new_string = end_edge[3]['DatesVelocities'])
-        # temp = end_edge[3]['DatesVelocities'].strip("|").split("|")
-        # # There should at least be one speed registration point
-        # if len(temp)> 1:
-        #     for p in range(0,len(temp),2):
-        #         candidate_datvel = temp[p] +"|"+ temp[p+1]
-        #         if not (candidate_datvel in new_datvel): new_datvel += "|" + candidate_datvel
-        # datvel = new_datvel
-        #TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO
-        #TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO
-        #TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO
+
         # Determine full edge geometry. The location of old_point is preserved, but without an explicit node. 
         geom_1 = start_edge[3]['geometry']
         geom_2 = end_edge[3]['geometry']
@@ -618,23 +603,8 @@ def remove_point(G, old_point, do_print = False):
                     print("Very strange, a splitted edge should have on both sides the same value for highway..")
                     stop
                 
-                #TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO
-                #TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO
-                #TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO
-                #print(start_edge[3]['DatesVelocities'])
-                #print(end_edge[3]['DatesVelocities'])
                 new_datvel = start_edge[3]['DatesVelocities'] 
                 datvel = add_datvels(current_string = new_datvel, new_string = end_edge[3]['DatesVelocities'])
-                # temp = end_edge[3]['DatesVelocities'].strip("|").split("|")
-#                 # There should at least be one speed registration point
-#                 if len(temp)> 1:
-#                     for p in range(0,len(temp),2):
-#                         candidate_datvel = temp[p] +"|"+ temp[p+1]
-#                         if not (candidate_datvel in new_datvel): new_datvel += "|" + candidate_datvel
-#                 datvel = new_datvel
-                #TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO
-                #TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO
-                #TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO#TODO
                 
                 # Determine geometry of this edge. The location of old_point is preserved, but without an explicit node. 
                 geom_1 = start_edge[3]['geometry']     
